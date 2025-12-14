@@ -40,7 +40,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * @var array<string, string>
+     * @return array<string, string>
      */
     protected function casts(): array
     {
