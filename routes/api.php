@@ -1,13 +1,13 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Log;
 
-Route::match(['get', 'post'], '/test', function (Request $request) {
-    Log::info('API test', ['params' => $request->all()]);
-    return response()->json([
-        'message' => 'API test',
-        'result' => true,
-    ]);
+// 認証関連のルート
+Route::group([
+    'prefix' => 'auth',
+    'middleware' => 'throttle:5,1',
+    'as' => 'auth.',
+], function () {
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
 });
