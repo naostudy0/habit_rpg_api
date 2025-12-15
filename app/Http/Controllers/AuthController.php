@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -21,7 +20,6 @@ class AuthController extends Controller
      *
      * @param LoginRequest $request
      * @return JsonResponse
-     * @throws ValidationException
      */
     public function login(LoginRequest $request): JsonResponse
     {
@@ -35,9 +33,12 @@ class AuthController extends Controller
 
         // 認証失敗時
         if (!$user) {
-            throw ValidationException::withMessages([
-                'email' => ['メールアドレスまたはパスワードが正しくありません。'],
-            ])->status(401);
+            return response()->json([
+                'message' => '認証に失敗しました。',
+                'errors' => [
+                    'email' => ['メールアドレスまたはパスワードが正しくありません。'],
+                ],
+            ], 401);
         }
 
         // トークンを生成
