@@ -111,7 +111,7 @@ class TaskController extends Controller
         $is_completed = $request->validated()['is_completed'];
 
         // 予定の完了状態を切り替え
-        $task = $this->task_service->toggleCompletion(
+        $task = $this->task_service->updateCompletion(
             $uuid,
             $request->user()->user_id,
             $is_completed

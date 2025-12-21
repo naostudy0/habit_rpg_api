@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // 認証関連のルート
@@ -11,6 +12,16 @@ Route::group([
     'as' => 'auth.',
 ], function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login');
+});
+
+// ユーザー関連のルート
+Route::group([
+    'prefix' => 'user',
+    'middleware' => ['auth:sanctum'],
+    'as' => 'user.',
+], function () {
+    Route::get('/', [UserController::class, 'show'])->name('show');
+    Route::put('/', [UserController::class, 'update'])->name('update');
 });
 
 // 予定関連のルート
