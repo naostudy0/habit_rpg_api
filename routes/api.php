@@ -23,4 +23,5 @@ Route::group([
     Route::post('/', [TaskController::class, 'store'])->name('store');
     Route::put('/{uuid}', [TaskController::class, 'update'])->name('update');
     Route::delete('/{uuid}', [TaskController::class, 'destroy'])->name('destroy');
+    Route::patch('/{uuid}/complete', [TaskController::class, 'toggleComplete'])->name('complete');
 });
