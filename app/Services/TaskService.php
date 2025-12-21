@@ -31,6 +31,28 @@ class TaskService
     }
 
     /**
+     * 予定を作成
+     *
+     * @param int $user_id
+     * @param array $data
+     * @return array
+     */
+    public function createTask(int $user_id, array $data): array
+    {
+        $task = $this->task_repository->create([
+            'user_id' => $user_id,
+            'title' => $data['title'],
+            'scheduled_date' => $data['scheduled_date'],
+            'scheduled_time' => $data['scheduled_time'],
+            'memo' => $data['memo'] ?? null,
+            'is_completed' => false,
+        ]);
+
+        // 予定をAPIレスポンス形式に変換して返す
+        return $this->formatTaskForApi($task);
+    }
+
+    /**
      * UUIDとユーザーIDで予定の存在確認
      *
      * @param string $uuid

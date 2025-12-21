@@ -45,6 +45,17 @@ class TaskRepository
     }
 
     /**
+     * 予定を作成
+     *
+     * @param array $data
+     * @return Task
+     */
+    public function create(array $data): Task
+    {
+        return $this->task->create($data);
+    }
+
+    /**
      * 予定の完了状態を更新
      *
      * @param Task $task
