@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Task;
 use App\Repositories\TaskRepository;
 
 class TaskService
@@ -23,17 +24,64 @@ class TaskService
     {
         $tasks = $this->task_repository->findByUserId($user_id);
 
+        // 予定をAPIレスポンス形式に変換して返す
         return $tasks->map(function ($task) {
-            return [
-                'uuid' => $task->task_uuid,
-                'title' => $task->title,
-                'scheduled_date' => $task->scheduled_date->format('Y-m-d'),
-                'scheduled_time' => $task->scheduled_time,
-                'memo' => $task->memo,
-                'is_completed' => $task->is_completed,
-                'created_at' => $task->created_at->toIso8601String(),
-                'updated_at' => $task->updated_at->toIso8601String(),
-            ];
+            return $this->formatTaskForApi($task);
         })->toArray();
+    }
+
+    /**
+     * UUIDとユーザーIDで予定の存在確認
+     *
+     * @param string $uuid
+     * @param int $user_id
+     * @return bool
+     */
+    public function existsByUuidAndUserId(string $uuid, int $user_id): bool
+    {
+        return !is_null($this->task_repository->findByUuidAndUserId($uuid, $user_id));
+    }
+
+    /**
+     * 予定の完了状態を切り替え
+     *
+     * @param string $uuid
+     * @param int $user_id
+     * @param bool $is_completed
+     * @return array
+     */
+    public function updateCompletion(string $uuid, int $user_id, bool $is_completed): array
+    {
+        // 予定を取得
+        $task = $this->task_repository->findByUuidAndUserId($uuid, $user_id);
+        if (!$task) {
+            return [];
+        }
+
+        // 予定の完了状態を更新
+        $task = $this->task_repository->updateCompletion($task, $is_completed);
+
+        // 予定をAPIレスポンス形式に変換して返す
+        return $this->formatTaskForApi($task);
+    }
+
+    /**
+     * TaskオブジェクトをAPIレスポンス形式の配列に変換
+     *
+     * @param Task $task
+     * @return array
+     */
+    private function formatTaskForApi(Task $task): array
+    {
+        return [
+            'uuid' => $task->task_uuid,
+            'title' => $task->title,
+            'scheduled_date' => $task->scheduled_date->format('Y-m-d'),
+            'scheduled_time' => $task->scheduled_time,
+            'memo' => $task->memo,
+            'is_completed' => $task->is_completed,
+            'created_at' => $task->created_at->toIso8601String(),
+            'updated_at' => $task->updated_at->toIso8601String(),
+        ];
     }
 }

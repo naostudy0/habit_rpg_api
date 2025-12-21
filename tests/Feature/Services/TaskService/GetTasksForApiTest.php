@@ -31,10 +31,6 @@ class GetTasksForApiTest extends TestCase
         // テストユーザーに紐づく予定を作成
         Task::factory()->create([
             'user_id' => $user->user_id,
-            'title' => 'テスト予定',
-            'scheduled_date' => '2025-12-20',
-            'scheduled_time' => '10:00:00',
-            'memo' => 'テストメモ',
             'is_completed' => false,
         ]);
 
@@ -131,15 +127,19 @@ class GetTasksForApiTest extends TestCase
         // テストユーザーを作成
         $user = User::factory()->create();
 
-        // テストユーザーに紐づく予定を複数作成
+        // テストユーザーに紐づく予定を複数作成（ソート順を保証するためscheduled_dateとscheduled_timeを指定）
         Task::factory()->create([
             'user_id' => $user->user_id,
             'title' => '予定1',
+            'scheduled_date' => '2025-12-20',
+            'scheduled_time' => '10:00:00',
             'is_completed' => false,
         ]);
         Task::factory()->create([
             'user_id' => $user->user_id,
             'title' => '予定2',
+            'scheduled_date' => '2025-12-21',
+            'scheduled_time' => '10:00:00',
             'is_completed' => true,
         ]);
 

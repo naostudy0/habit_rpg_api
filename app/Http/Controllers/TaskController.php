@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Task\ToggleCompleteTaskRequest;
 use App\Services\TaskService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class TaskController extends Controller
 {
@@ -139,6 +141,31 @@ class TaskController extends Controller
         return response()->json([
             'result' => true,
             'message' => '予定を削除しました',
+        ], 200);
+    }
+
+    /**
+     * 予定の完了状態を切り替え
+     *
+     * @param ToggleCompleteTaskRequest $request
+     * @param string $uuid
+     * @return JsonResponse
+     */
+    public function toggleComplete(ToggleCompleteTaskRequest $request, string $uuid): JsonResponse
+    {
+        $is_completed = $request->validated()['is_completed'];
+
+        // 予定の完了状態を切り替え
+        $task = $this->task_service->toggleCompletion(
+            $uuid,
+            $request->user()->user_id,
+            $is_completed
+        );
+
+        return response()->json([
+            'result' => true,
+            'message' => $is_completed ? '予定を完了にしました' : '予定を未完了にしました',
+            'data' => $task,
         ], 200);
     }
 }
