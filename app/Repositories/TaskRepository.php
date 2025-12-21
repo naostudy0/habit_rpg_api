@@ -56,6 +56,20 @@ class TaskRepository
     }
 
     /**
+     * 予定を更新
+     *
+     * @param Task $task
+     * @param array $data
+     * @return Task
+     */
+    public function update(Task $task, array $data): Task
+    {
+        $task->update($data);
+
+        return $task;
+    }
+
+    /**
      * 予定の完了状態を更新
      *
      * @param Task $task

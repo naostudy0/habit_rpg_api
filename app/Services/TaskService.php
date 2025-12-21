@@ -53,6 +53,36 @@ class TaskService
     }
 
     /**
+     * 予定を更新
+     *
+     * @param string $uuid
+     * @param int $user_id
+     * @param array $data
+     * @return array|null
+     */
+    public function updateTask(string $uuid, int $user_id, array $data): ?array
+    {
+        // 予定を取得
+        $task = $this->task_repository->findByUuidAndUserId($uuid, $user_id);
+        if (!$task) {
+            return null;
+        }
+
+        // 予定を更新
+        $update_data = [
+            'title' => $data['title'],
+            'scheduled_date' => $data['scheduled_date'],
+            'scheduled_time' => $data['scheduled_time'],
+            'memo' => $data['memo'] ?? null,
+        ];
+
+        $task = $this->task_repository->update($task, $update_data);
+
+        // 予定をAPIレスポンス形式に変換して返す
+        return $this->formatTaskForApi($task);
+    }
+
+    /**
      * UUIDとユーザーIDで予定の存在確認
      *
      * @param string $uuid
