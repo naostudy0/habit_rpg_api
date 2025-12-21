@@ -83,6 +83,25 @@ class TaskService
     }
 
     /**
+     * 予定を削除
+     *
+     * @param string $uuid
+     * @param int $user_id
+     * @return bool
+     */
+    public function deleteTask(string $uuid, int $user_id): bool
+    {
+        // 予定を取得
+        $task = $this->task_repository->findByUuidAndUserId($uuid, $user_id);
+        if (!$task) {
+            return false;
+        }
+
+        // 予定を削除
+        return $this->task_repository->delete($task);
+    }
+
+    /**
      * UUIDとユーザーIDで予定の存在確認
      *
      * @param string $uuid

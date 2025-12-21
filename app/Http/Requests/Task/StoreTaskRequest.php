@@ -2,36 +2,20 @@
 
 namespace App\Http\Requests\Task;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StoreTaskRequest extends FormRequest
+class StoreTaskRequest extends BaseTaskRequest
 {
     /**
-     * 認証の有無
+     * バリデーション実行前の処理
+     * 存在確認を無効化（作成時は存在確認不要）
      *
-     * @return bool
-     */
-    public function authorize(): bool
-    {
-        return $this->user() !== null;
-    }
-
-    /**
-     * 認証失敗時の処理
-     *
+     * @param Validator $validator
      * @return void
-     * @throws HttpResponseException
      */
-    protected function failedAuthorization(): void
+    public function withValidator(Validator $validator): void
     {
-        throw new HttpResponseException(
-            response()->json([
-                'result' => false,
-                'message' => '認証が必要です。',
-            ], 401)
-        );
+        // 存在確認は不要のため継承元のメソッドをオーバーライド
     }
 
     /**
@@ -67,25 +51,5 @@ class StoreTaskRequest extends FormRequest
             'memo.string' => 'メモは文字列で入力してください。',
             'memo.max' => 'メモは1000文字以内で入力してください。',
         ];
-    }
-
-    /**
-     * バリデーション失敗時の処理
-     *
-     * @param Validator $validator
-     * @return void
-     * @throws HttpResponseException
-     */
-    protected function failedValidation(Validator $validator): void
-    {
-        $errors = $validator->errors();
-
-        throw new HttpResponseException(
-            response()->json([
-                'result' => false,
-                'message' => 'バリデーションエラーが発生しました。',
-                'errors' => $errors,
-            ], 422)
-        );
     }
 }
