@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Task\DeleteTaskRequest;
 use App\Http\Requests\Task\StoreTaskRequest;
 use App\Http\Requests\Task\ToggleCompleteTaskRequest;
 use App\Http\Requests\Task\UpdateTaskRequest;
@@ -79,16 +80,18 @@ class TaskController extends Controller
     }
 
     /**
-     * 予定削除（仮の実装）
+     * 予定削除
      *
-     * @param Request $request
+     * @param DeleteTaskRequest $request
      * @param string $uuid
      * @return JsonResponse
      */
-    public function destroy(Request $request, string $uuid): JsonResponse
+    public function destroy(DeleteTaskRequest $request, string $uuid): JsonResponse
     {
-        // 仮の予定削除処理（実際の実装ではデータベースから削除）
-        // ここでは削除成功を返す
+        $this->task_service->deleteTask(
+            $uuid,
+            $request->user()->user_id
+        );
 
         return response()->json([
             'result' => true,

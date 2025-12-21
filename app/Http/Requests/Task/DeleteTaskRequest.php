@@ -2,18 +2,18 @@
 
 namespace App\Http\Requests\Task;
 
-class ToggleCompleteTaskRequest extends BaseTaskRequest
+class DeleteTaskRequest extends BaseTaskRequest
 {
     /**
      * バリデーションルール
+     * 削除リクエストでは追加のバリデーションルールは不要
+     * UUIDの存在確認はBaseTaskRequestのwithValidatorで行われる
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
-        return [
-            'is_completed' => ['required', 'boolean'],
-        ];
+        return [];
     }
 
     /**
@@ -23,9 +23,6 @@ class ToggleCompleteTaskRequest extends BaseTaskRequest
      */
     public function messages(): array
     {
-        return [
-            'is_completed.required' => '完了状態は必須です。',
-            'is_completed.boolean' => '完了状態は真偽値で入力してください。',
-        ];
+        return [];
     }
 }

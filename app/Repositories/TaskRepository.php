@@ -70,6 +70,17 @@ class TaskRepository
     }
 
     /**
+     * 予定を削除
+     *
+     * @param Task $task
+     * @return bool
+     */
+    public function delete(Task $task): bool
+    {
+        return $task->delete();
+    }
+
+    /**
      * 予定の完了状態を更新
      *
      * @param Task $task
