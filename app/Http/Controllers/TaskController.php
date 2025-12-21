@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Task\StoreTaskRequest;
 use App\Http\Requests\Task\ToggleCompleteTaskRequest;
+use App\Http\Requests\Task\UpdateTaskRequest;
 use App\Services\TaskService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -56,43 +57,19 @@ class TaskController extends Controller
     }
 
     /**
-     * 予定更新（仮の実装）
+     * 予定更新
      *
-     * @param Request $request
+     * @param UpdateTaskRequest $request
      * @param string $uuid
      * @return JsonResponse
      */
-    public function update(Request $request, string $uuid): JsonResponse
+    public function update(UpdateTaskRequest $request, string $uuid): JsonResponse
     {
-        // バリデーション
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'scheduled_date' => ['required', 'date'],
-            'scheduled_time' => ['required', 'string', 'regex:/^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/'],
-            'memo' => ['nullable', 'string', 'max:1000'],
-        ], [
-            'title.required' => 'タイトルは必須です。',
-            'title.string' => 'タイトルは文字列で入力してください。',
-            'title.max' => 'タイトルは255文字以内で入力してください。',
-            'scheduled_date.required' => '予定日は必須です。',
-            'scheduled_date.date' => '有効な日付を入力してください。',
-            'scheduled_time.required' => '予定時刻は必須です。',
-            'scheduled_time.regex' => '有効な時刻形式（HH:MM:SS）で入力してください。',
-            'memo.string' => 'メモは文字列で入力してください。',
-            'memo.max' => 'メモは1000文字以内で入力してください。',
-        ]);
-
-        // 仮の予定データを更新（実際の実装ではデータベースを更新）
-        $task = [
-            'uuid' => $uuid,
-            'title' => $validated['title'],
-            'scheduled_date' => $validated['scheduled_date'],
-            'scheduled_time' => $validated['scheduled_time'],
-            'memo' => $validated['memo'] ?? null,
-            'is_completed' => false, // 既存の状態を保持する場合は、リクエストから取得
-            'created_at' => now()->subDays(1)->toIso8601String(), // 既存の作成日時を保持
-            'updated_at' => now()->toIso8601String(),
-        ];
+        $task = $this->task_service->updateTask(
+            $uuid,
+            $request->user()->user_id,
+            $request->validated()
+        );
 
         return response()->json([
             'result' => true,
