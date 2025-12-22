@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskSuggestionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,4 +36,14 @@ Route::group([
     Route::put('/{uuid}', [TaskController::class, 'update'])->name('update');
     Route::delete('/{uuid}', [TaskController::class, 'destroy'])->name('destroy');
     Route::patch('/{uuid}/complete', [TaskController::class, 'toggleComplete'])->name('complete');
+});
+
+// 提案関連のルート
+Route::group([
+    'prefix' => 'task-suggestions',
+    'middleware' => ['auth:sanctum'],
+    'as' => 'task-suggestions.',
+], function () {
+    Route::get('/', [TaskSuggestionController::class, 'index'])->name('index');
+    Route::delete('/{uuid}', [TaskSuggestionController::class, 'destroy'])->name('destroy');
 });

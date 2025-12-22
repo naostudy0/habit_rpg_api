@@ -94,4 +94,49 @@ class TaskRepository
 
         return $task;
     }
+
+    /**
+     * ユーザーの最近の予定を取得（過去30日間と未来7日間）
+     *
+     * @param int $user_id
+     * @param int $limit
+     * @return Collection
+     */
+    public function findRecentTasksByUserId(int $user_id, int $limit = 20): Collection
+    {
+        return $this->task
+            ->where('user_id', $user_id)
+            ->whereBetween('scheduled_date', [
+                now()->subDays(30)->format('Y-m-d'),
+                now()->addDays(7)->format('Y-m-d')
+            ])
+            ->orderBy('scheduled_date', 'desc')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * 予定があるユーザーIDの一覧を取得
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getDistinctUserIds(): \Illuminate\Support\Collection
+    {
+        return $this->task
+            ->distinct()
+            ->pluck('user_id');
+    }
+
+    /**
+     * 指定されたユーザーに予定があるか確認
+     *
+     * @param int $user_id
+     * @return bool
+     */
+    public function hasTasksByUserId(int $user_id): bool
+    {
+        return $this->task
+            ->where('user_id', $user_id)
+            ->exists();
+    }
 }

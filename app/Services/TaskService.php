@@ -137,6 +137,54 @@ class TaskService
     }
 
     /**
+     * 予定があるユーザーIDの一覧を取得
+     *
+     * @return array
+     */
+    public function getUserIdsWithTasks(): array
+    {
+        return $this->task_repository->getDistinctUserIds()->toArray();
+    }
+
+    /**
+     * 指定されたユーザーに予定があるか確認
+     *
+     * @param int $user_id
+     * @return bool
+     */
+    public function hasTasksByUserId(int $user_id): bool
+    {
+        return $this->task_repository->hasTasksByUserId($user_id);
+    }
+
+    /**
+     * ユーザーの最近の予定をプロンプト用に整形
+     *
+     * @param int $user_id
+     * @param int $limit
+     * @return string
+     */
+    public function formatRecentTasksForPrompt(int $user_id, int $limit = 10): string
+    {
+        $tasks = $this->task_repository->findRecentTasksByUserId($user_id, $limit);
+
+        if ($tasks->isEmpty()) {
+            return '予定はありません。';
+        }
+
+        $formatted = [];
+        foreach ($tasks as $task) {
+            $formatted_line = $task->title;
+            if ($task->memo) {
+                $formatted_line .= "：{$task->memo}";
+            }
+            $formatted[] = $formatted_line;
+        }
+
+        return implode("\n", $formatted);
+    }
+
+    /**
      * TaskオブジェクトをAPIレスポンス形式の配列に変換
      *
      * @param Task $task
