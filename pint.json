@@ -1,0 +1,21 @@
+{
+    "preset": "psr12",
+    "rules": {
+        "new_with_parentheses": false,
+        "class_definition": false,
+        "no_unused_imports": true,
+        "ordered_imports": true,
+        "cast_spaces": true,
+        "binary_operator_spaces": { "default": "single_space" },
+        "trailing_comma_in_multiline": true,
+        "array_syntax": { "syntax": "short" },
+        "single_quote": true
+    },
+    "exclude": [
+        "bootstrap",
+        "config",
+        "database/migrations",
+        "storage",
+        "vendor"
+    ]
+}

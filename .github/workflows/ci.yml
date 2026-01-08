@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: habit_rpg_test
+          MYSQL_USER: test_user
+          MYSQL_PASSWORD: test_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, mysql, pdo, pdo_mysql, zip
+          coverage: xdebug
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Copy environment file
+        run: |
+          cp .env.example .env || true
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Set up environment variables
+        run: |
+          echo "APP_ENV=testing" >> .env
+          echo "APP_DEBUG=true" >> .env
+          echo "DB_CONNECTION=mysql" >> .env
+          echo "DB_HOST=mysql" >> .env
+          echo "DB_PORT=3306" >> .env
+          echo "DB_DATABASE=habit_rpg_test" >> .env
+          echo "DB_USERNAME=test_user" >> .env
+          echo "DB_PASSWORD=test_password" >> .env
+          echo "OLLAMA_URL=http://localhost/dummy" >> .env
+          echo "OLLAMA_MODEL=llama3" >> .env
+
+      - name: Run database migrations
+        run: php artisan migrate --force
+
+      # コードフォーマットの確認
+      - name: Check code formatting
+        run: ./vendor/bin/pint --test
+
+      # テスト実行（カバレッジ生成）
+      - name: Run tests with coverage
+        run: |
+          mkdir -p coverage
+          vendor/bin/phpunit --coverage-clover=coverage/clover.xml --coverage-html=coverage/html --coverage-text=coverage/coverage.txt
+
+      # Summaryに結果表示
+      - name: Test summary
+        if: always()
+        run: |
+          echo "## CI Summary" >> $GITHUB_STEP_SUMMARY
+          if [ -f coverage/clover.xml ]; then
+            echo "- Tests: passed" >> $GITHUB_STEP_SUMMARY
+            echo "- Coverage: generated (coverage/clover.xml)" >> $GITHUB_STEP_SUMMARY
+            if [ -f coverage/coverage.txt ]; then
+              echo "### Coverage Report" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              head -20 coverage/coverage.txt >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "- Tests: failed" >> $GITHUB_STEP_SUMMARY
+            echo "- Coverage: not generated" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      # Codecovへカバレッジアップロード
+      - name: Upload coverage to Codecov
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/clover.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+      # カバレッジレポートをアーティファクトとして保存
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: coverage/
+          retention-days: 30

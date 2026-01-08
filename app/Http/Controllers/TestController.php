@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -20,7 +20,7 @@ class TestController extends Controller
     {
         // storeからのリダイレクトの場合は、質問と回答を取得
         $question = $request->session()->get('question', '');
-        $answer   = $request->session()->get('answer', '');
+        $answer = $request->session()->get('answer', '');
 
         return view('test', compact('question', 'answer'));
     }
@@ -38,7 +38,7 @@ class TestController extends Controller
             return redirect()->route('home');
         }
 
-        $ollama_url   = config('ollama.url');
+        $ollama_url = config('ollama.url');
         $ollama_model = config('ollama.model');
 
         try {
@@ -57,7 +57,7 @@ class TestController extends Controller
                     'status' => $status_code,
                     'body' => $error_body,
                     'url' => $ollama_url,
-                    'model' => $ollama_model
+                    'model' => $ollama_model,
                 ]);
 
                 return redirect()->route('test.index')->with([
@@ -88,13 +88,13 @@ class TestController extends Controller
         } catch (\Illuminate\Http\Client\ConnectionException $e) {
             Log::error('Connection exception', [
                 'message' => $e->getMessage(),
-                'url' => $ollama_url
+                'url' => $ollama_url,
             ]);
             $answer = 'Ollamaコンテナへの接続に失敗しました。コンテナが起動しているか確認してください。エラー: ' . $e->getMessage();
         } catch (\Exception $e) {
             Log::error('Exception occurred', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             $answer = 'エラーが発生しました: ' . $e->getMessage();
         }

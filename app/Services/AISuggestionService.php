@@ -68,12 +68,12 @@ PROMPT;
      */
     private function callOllamaAPI(string $prompt): ?array
     {
-        $ollama_url   = config('ollama.url');
+        $ollama_url = config('ollama.url');
         $ollama_model = config('ollama.model');
 
         try {
             $response = Http::timeout(600)->post($ollama_url, [
-                'model'  => $ollama_model,
+                'model' => $ollama_model,
                 'prompt' => $prompt,
                 'system' => 'あなたは予定管理をサポートするAIアシスタントです。指定された形式で回答してください。',
                 'stream' => true,
@@ -82,9 +82,9 @@ PROMPT;
             if (!$response->successful()) {
                 Log::error('Ollama API request failed', [
                     'status' => $response->status(),
-                    'body'   => $response->body(),
-                    'url'    => $ollama_url,
-                    'model'  => $ollama_model,
+                    'body' => $response->body(),
+                    'url' => $ollama_url,
+                    'model' => $ollama_model,
                 ]);
                 return null;
             }
@@ -121,7 +121,7 @@ PROMPT;
                 // nullまたは空文字列のチェック
                 if (empty($suggestion[$key])) {
                     Log::warning('Empty value for DB', [
-                        'field'  => $key,
+                        'field' => $key,
                         'answer' => $answer,
                     ]);
                     return null;
@@ -129,7 +129,7 @@ PROMPT;
 
                 if (!StringSanitizer::canStoreToDb($suggestion[$key])) {
                     Log::warning('Invalid string for DB', [
-                        'field'  => $key,
+                        'field' => $key,
                         'answer' => $answer,
                     ]);
                     return null;
@@ -149,14 +149,14 @@ PROMPT;
         } catch (\Illuminate\Http\Client\ConnectionException $e) {
             Log::error('Connection exception in AISuggestionService', [
                 'message' => $e->getMessage(),
-                'url'     => $ollama_url,
+                'url' => $ollama_url,
             ]);
             return null;
         } catch (\Throwable $e) {
             Log::error('Exception occurred in AISuggestionService', [
                 'message' => $e->getMessage(),
-                'trace'   => $e->getTraceAsString(),
-                'url'     => $ollama_url,
+                'trace' => $e->getTraceAsString(),
+                'url' => $ollama_url,
             ]);
             return null;
         }
@@ -196,12 +196,12 @@ PROMPT;
             // 予定名：提案理由の形式かチェック
             if (preg_match('/^(.+?)[：:]\s*(.+)$/u', $line, $matches)) {
                 $title = trim($matches[1]);
-                $memo  = trim($matches[2]);
+                $memo = trim($matches[2]);
 
                 if ($title !== '' && $memo !== '') {
                     return [
                         'title' => $title,
-                        'memo'  => $memo,
+                        'memo' => $memo,
                     ];
                 }
             }
@@ -217,7 +217,7 @@ PROMPT;
                 if ($memo !== '') {
                     return [
                         'title' => $title,
-                        'memo'  => $memo,
+                        'memo' => $memo,
                     ];
                 }
             }

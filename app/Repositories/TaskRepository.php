@@ -108,7 +108,7 @@ class TaskRepository
             ->where('user_id', $user_id)
             ->whereBetween('scheduled_date', [
                 now()->subDays(30)->format('Y-m-d'),
-                now()->addDays(7)->format('Y-m-d')
+                now()->addDays(7)->format('Y-m-d'),
             ])
             ->orderBy('scheduled_date', 'desc')
             ->limit($limit)
