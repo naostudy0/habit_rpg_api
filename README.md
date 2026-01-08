@@ -60,7 +60,7 @@ MySQL（データベース）
 - MySQL：データ永続化
 - Ollama：LLMによる予定提案生成
 
-**注意**: Docker環境の詳細については、プロジェクトルート（`habit_rpg_docker`）のREADMEを参照してください。
+**注意**: Docker環境の詳細については、[habit_rpg_docker](https://github.com/naostudy0/habit_rpg_docker)リポジトリのREADMEを参照してください。
 
 ## 技術スタック
 
@@ -86,13 +86,13 @@ MySQL（データベース）
 - Composer
 - MySQL 8.0（Docker環境で提供される場合は、Docker環境のREADMEを参照）
 
-**注意**: Docker環境でのセットアップについては、プロジェクトルート（`habit_rpg_docker`）のREADMEを参照してください。
+**注意**: Docker環境でのセットアップについては、[habit_rpg_docker](https://github.com/naostudy0/habit_rpg_docker)リポジトリのREADMEを参照してください。
 
 ## セットアップ
 
 ### 前提条件
 
-Docker環境が既に起動していることを前提とします。Docker環境のセットアップについては、プロジェクトルート（`habit_rpg_docker`）のREADMEを参照してください。
+Docker環境が既に起動していることを前提とします。Docker環境のセットアップについては、[habit_rpg_docker](https://github.com/naostudy0/habit_rpg_docker)リポジトリのREADMEを参照してください。
 
 ### 1. 依存関係のインストール
 
@@ -173,11 +173,27 @@ docker exec -it habit_rpg_container php artisan queue:listen
 docker exec -it habit_rpg_container php artisan pail
 ```
 
-### コードフォーマット
+### コードフォーマット・品質管理
 
 ```bash
 ./vendor/bin/pint
 ```
+
+本プロジェクトでは、コードフォーマットおよび品質担保のために  
+**Laravel Pint（PSR-12 ベース）** を採用しています。
+
+- フォーマットルールは PSR-12 を基準としつつ、  
+  Laravel の自動生成コード（migration など）と衝突しないよう一部ルールを調整しています
+- コードフォーマットは自動整形を前提とし、レビュー時の差分を最小限に抑えることを目的としています
+
+CI（GitHub Actions）では、以下を実行しています。
+
+- `pint --test` によるフォーマットチェック  
+  （フォーマット違反がある場合は CI が失敗します）
+- PHPUnit によるテスト実行
+
+これにより、Pull Request時に  
+**「テストが通っていること」「コードスタイルが統一されていること」** を自動で確認できる構成としています。
 
 ## テスト
 

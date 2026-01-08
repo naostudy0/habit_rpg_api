@@ -51,7 +51,7 @@ class SuggestTasksCommand extends Command
 
         // 特定のユーザーIDが指定された場合
         if ($user_id_option) {
-            $user_id = (int)$user_id_option;
+            $user_id = (int) $user_id_option;
 
             // 指定されたユーザーに予定があるか確認
             if (!$this->task_service->hasTasksByUserId($user_id)) {
@@ -90,7 +90,7 @@ class SuggestTasksCommand extends Command
             // 提案を保存
             $this->task_suggestion_service->createSuggestion($user_id, [
                 'title' => $suggestion['title'],
-                'memo'  => $suggestion['memo'],
+                'memo' => $suggestion['memo'],
             ]);
             $success_count++;
         }
