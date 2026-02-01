@@ -6,7 +6,7 @@ use App\UseCases\Inputs\Input;
 use App\UseCases\Results\Result;
 
 /**
- * UseCaseの共通インターフェース。
+ * UseCaseの共通インターフェース
  */
 interface UseCaseInterface
 {

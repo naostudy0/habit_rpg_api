@@ -5,7 +5,7 @@ namespace App\UseCases\Results;
 use App\UseCases\Outputs\Output;
 
 /**
- * UseCaseの実行結果を表す共通Result。
+ * UseCaseの実行結果を表す共通Result
  */
 final class Result
 {
