@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Repositories\TaskRepository;
 
+use App\Infrastructure\Repositories\EloquentTaskRepository;
 use App\Models\Task;
 use App\Models\User;
-use App\Repositories\TaskRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,12 +12,12 @@ class DeleteTest extends TestCase
 {
     use RefreshDatabase;
 
-    private TaskRepository $task_repository;
+    private EloquentTaskRepository $task_repository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->task_repository = app(TaskRepository::class);
+        $this->task_repository = app(EloquentTaskRepository::class);
     }
 
     /**
@@ -33,8 +33,11 @@ class DeleteTest extends TestCase
             'user_id' => $user->user_id,
         ]);
 
+        $domain_task = $this->task_repository->findByUuidAndUserId($task->task_uuid, $user->user_id);
+        $this->assertNotNull($domain_task);
+
         // 予定を削除
-        $result = $this->task_repository->delete($task);
+        $result = $this->task_repository->delete($domain_task);
 
         // 検証
         $this->assertTrue($result);
@@ -60,8 +63,11 @@ class DeleteTest extends TestCase
 
         $task_uuid = $task->task_uuid;
 
+        $domain_task = $this->task_repository->findByUuidAndUserId($task_uuid, $user->user_id);
+        $this->assertNotNull($domain_task);
+
         // 予定を削除
-        $this->task_repository->delete($task);
+        $this->task_repository->delete($domain_task);
 
         // 削除された予定は取得できないことを確認
         $found_task = $this->task_repository->findByUuidAndUserId($task_uuid, $user->user_id);

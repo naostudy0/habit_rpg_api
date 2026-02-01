@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
-use App\Models\TaskSuggestion;
-use App\Repositories\TaskSuggestionRepository;
+use App\Domain\Entities\TaskSuggestion;
+use App\Domain\Repositories\TaskSuggestionRepositoryInterface;
 
 class TaskSuggestionService
 {
-    private TaskSuggestionRepository $task_suggestion_repository;
+    private TaskSuggestionRepositoryInterface $task_suggestion_repository;
 
-    public function __construct(TaskSuggestionRepository $task_suggestion_repository)
+    public function __construct(TaskSuggestionRepositoryInterface $task_suggestion_repository)
     {
         $this->task_suggestion_repository = $task_suggestion_repository;
     }
@@ -22,12 +22,16 @@ class TaskSuggestionService
      */
     public function createSuggestion(int $user_id, array $data): void
     {
-        $this->task_suggestion_repository
-            ->create([
-                'user_id' => $user_id,
-                'title' => $data['title'],
-                'memo' => $data['memo'],
-            ]);
+        $task_suggestion = new TaskSuggestion(
+            null,
+            '',
+            $user_id,
+            $data['title'],
+            $data['memo'],
+            null,
+            null
+        );
+        $this->task_suggestion_repository->create($task_suggestion);
     }
 
     /**
@@ -40,9 +44,9 @@ class TaskSuggestionService
     {
         $suggestions = $this->task_suggestion_repository->findByUserId($user_id);
 
-        return $suggestions->map(function ($suggestion) {
+        return array_map(function (TaskSuggestion $suggestion): array {
             return $this->formatSuggestionForApi($suggestion);
-        })->toArray();
+        }, $suggestions);
     }
 
     /**
@@ -73,11 +77,11 @@ class TaskSuggestionService
     private function formatSuggestionForApi(TaskSuggestion $task_suggestion): array
     {
         return [
-            'uuid' => $task_suggestion->task_suggestion_uuid,
-            'title' => $task_suggestion->title,
-            'memo' => $task_suggestion->memo,
-            'created_at' => $task_suggestion->created_at->toIso8601String(),
-            'updated_at' => $task_suggestion->updated_at->toIso8601String(),
+            'uuid' => $task_suggestion->getTaskSuggestionUuid(),
+            'title' => $task_suggestion->getTitle(),
+            'memo' => $task_suggestion->getMemo(),
+            'created_at' => $task_suggestion->getCreatedAt(),
+            'updated_at' => $task_suggestion->getUpdatedAt(),
         ];
     }
 }

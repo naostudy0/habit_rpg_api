@@ -2,8 +2,9 @@
 
 namespace Tests\Unit\Repositories\UserRepository;
 
+use App\Domain\Entities\User as DomainUser;
+use App\Infrastructure\Repositories\EloquentUserRepository;
 use App\Models\User;
-use App\Repositories\UserRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -11,12 +12,12 @@ class FindByEmailTest extends TestCase
 {
     use RefreshDatabase;
 
-    private UserRepository $user_repository;
+    private EloquentUserRepository $user_repository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->user_repository = app(UserRepository::class);
+        $this->user_repository = app(EloquentUserRepository::class);
     }
 
     /**
@@ -30,11 +31,15 @@ class FindByEmailTest extends TestCase
         // メールアドレスでユーザーを取得
         $result = $this->user_repository->findByEmail($user->email);
 
-        $expected = $user->only(['user_id', 'user_uuid', 'name', 'email', 'is_dark_mode', 'is_24_hour_format']);
-
         // 検証
         $this->assertNotNull($result);
-        $this->assertEquals($expected, $result->toArray());
+        $this->assertInstanceOf(DomainUser::class, $result);
+        $this->assertEquals($user->user_id, $result->getUserId());
+        $this->assertEquals($user->user_uuid, $result->getUserUuid());
+        $this->assertEquals($user->name, $result->getName());
+        $this->assertEquals($user->email, $result->getEmail());
+        $this->assertEquals((bool) $user->is_dark_mode, $result->isDarkMode());
+        $this->assertEquals((bool) $user->is_24_hour_format, $result->is24HourFormat());
     }
 
     /**

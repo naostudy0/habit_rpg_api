@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Services\AuthService;
 
+use App\Domain\Entities\User as DomainUser;
 use App\Models\User;
 use App\Services\AuthService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -33,11 +34,15 @@ class AuthenticateTest extends TestCase
         // 認証処理を実行
         $result = $this->auth_service->authenticate($user->email, $password);
 
-        $expected = $user->only(['user_id', 'user_uuid', 'name', 'email', 'is_dark_mode', 'is_24_hour_format']);
-
         // 検証
         $this->assertNotNull($result);
-        $this->assertEquals($expected, $result->toArray());
+        $this->assertInstanceOf(DomainUser::class, $result);
+        $this->assertEquals($user->user_id, $result->getUserId());
+        $this->assertEquals($user->user_uuid, $result->getUserUuid());
+        $this->assertEquals($user->name, $result->getName());
+        $this->assertEquals($user->email, $result->getEmail());
+        $this->assertEquals((bool) $user->is_dark_mode, $result->isDarkMode());
+        $this->assertEquals((bool) $user->is_24_hour_format, $result->is24HourFormat());
     }
 
     /**
@@ -71,9 +76,9 @@ class AuthenticateTest extends TestCase
     }
 
     /**
-     * 認証成功時にパスワードが削除されていること
+     * 認証成功時にパスワードがハッシュ化されていること
      */
-    public function testAuthenticateRemovesPasswordWhenSuccessful(): void
+    public function testAuthenticateReturnsHashedPasswordWhenSuccessful(): void
     {
         // テストユーザーを作成
         $password = 'password123';
@@ -86,6 +91,7 @@ class AuthenticateTest extends TestCase
 
         // 検証
         $this->assertNotNull($result);
-        $this->assertArrayNotHasKey('password', $result->toArray());
+        $this->assertNotNull($result->getPasswordHash());
+        $this->assertNotEquals($password, $result->getPasswordHash());
     }
 }

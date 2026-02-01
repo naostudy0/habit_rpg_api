@@ -2,9 +2,10 @@
 
 namespace Tests\Unit\Repositories\TaskRepository;
 
+use App\Domain\Entities\Task as DomainTask;
+use App\Infrastructure\Repositories\EloquentTaskRepository;
 use App\Models\Task;
 use App\Models\User;
-use App\Repositories\TaskRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,12 +13,12 @@ class UpdateTest extends TestCase
 {
     use RefreshDatabase;
 
-    private TaskRepository $task_repository;
+    private EloquentTaskRepository $task_repository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->task_repository = app(TaskRepository::class);
+        $this->task_repository = app(EloquentTaskRepository::class);
     }
 
     /**
@@ -45,15 +46,31 @@ class UpdateTest extends TestCase
             'memo' => '更新後のメモ',
         ];
 
+        $domain_task = $this->task_repository->findByUuidAndUserId($task->task_uuid, $user->user_id);
+        $this->assertNotNull($domain_task);
+
+        $updated_task = new DomainTask(
+            $domain_task->getTaskId(),
+            $domain_task->getTaskUuid(),
+            $domain_task->getUserId(),
+            $update_data['title'],
+            $update_data['scheduled_date'],
+            $update_data['scheduled_time'],
+            $update_data['memo'],
+            $domain_task->isCompleted(),
+            $domain_task->getCreatedAt(),
+            $domain_task->getUpdatedAt()
+        );
+
         // 予定を更新
-        $result = $this->task_repository->update($task, $update_data);
+        $result = $this->task_repository->update($updated_task);
 
         // 検証
-        $this->assertInstanceOf(Task::class, $result);
-        $this->assertEquals($update_data['title'], $result->title);
-        $this->assertEquals($update_data['scheduled_date'], $result->scheduled_date->format('Y-m-d'));
-        $this->assertEquals($update_data['scheduled_time'], $result->scheduled_time);
-        $this->assertEquals($update_data['memo'], $result->memo);
+        $this->assertInstanceOf(DomainTask::class, $result);
+        $this->assertEquals($update_data['title'], $result->getTitle());
+        $this->assertEquals($update_data['scheduled_date'], $result->getScheduledDate());
+        $this->assertEquals($update_data['scheduled_time'], $result->getScheduledTime());
+        $this->assertEquals($update_data['memo'], $result->getMemo());
     }
 
     /**
@@ -70,17 +87,35 @@ class UpdateTest extends TestCase
             'memo' => '元のメモ',
         ]);
 
-        // 更新データ（メモをnullに）
         $update_data = [
+            'title' => $task->title,
+            'scheduled_date' => $task->scheduled_date->format('Y-m-d'),
+            'scheduled_time' => $task->scheduled_time,
             'memo' => null,
         ];
 
+        $domain_task = $this->task_repository->findByUuidAndUserId($task->task_uuid, $user->user_id);
+        $this->assertNotNull($domain_task);
+
+        $updated_task = new DomainTask(
+            $domain_task->getTaskId(),
+            $domain_task->getTaskUuid(),
+            $domain_task->getUserId(),
+            $update_data['title'],
+            $update_data['scheduled_date'],
+            $update_data['scheduled_time'],
+            $update_data['memo'],
+            $domain_task->isCompleted(),
+            $domain_task->getCreatedAt(),
+            $domain_task->getUpdatedAt()
+        );
+
         // 予定を更新
-        $result = $this->task_repository->update($task, $update_data);
+        $result = $this->task_repository->update($updated_task);
 
         // 検証
-        $this->assertInstanceOf(Task::class, $result);
-        $this->assertNull($result->memo);
+        $this->assertInstanceOf(DomainTask::class, $result);
+        $this->assertNull($result->getMemo());
     }
 
     /**
@@ -108,8 +143,24 @@ class UpdateTest extends TestCase
             'memo' => '更新後のメモ',
         ];
 
+        $domain_task = $this->task_repository->findByUuidAndUserId($task->task_uuid, $user->user_id);
+        $this->assertNotNull($domain_task);
+
+        $updated_task = new DomainTask(
+            $domain_task->getTaskId(),
+            $domain_task->getTaskUuid(),
+            $domain_task->getUserId(),
+            $update_data['title'],
+            $update_data['scheduled_date'],
+            $update_data['scheduled_time'],
+            $update_data['memo'],
+            $domain_task->isCompleted(),
+            $domain_task->getCreatedAt(),
+            $domain_task->getUpdatedAt()
+        );
+
         // 予定を更新
-        $this->task_repository->update($task, $update_data);
+        $this->task_repository->update($updated_task);
 
         // データベースに正しく保存されていることを確認
         $this->assertDatabaseHas('tasks', [

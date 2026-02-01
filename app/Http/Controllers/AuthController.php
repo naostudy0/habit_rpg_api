@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 
@@ -42,12 +43,21 @@ class AuthController extends Controller
         }
 
         // トークンを生成
-        $token = $user->createToken('auth-token')->plainTextToken;
+        $auth_user = User::where('user_id', $user->getUserId())->first();
+        if (!$auth_user) {
+            return response()->json([
+                'message' => '認証に失敗しました。',
+                'errors' => [
+                    'email' => ['メールアドレスまたはパスワードが正しくありません。'],
+                ],
+            ], 401);
+        }
+        $token = $auth_user->createToken('auth-token')->plainTextToken;
 
         // 認証成功時
         return response()->json([
             'result' => true,
-            'data' => $user,
+            'data' => $auth_user,
             'token' => $token,
         ], 200);
     }
