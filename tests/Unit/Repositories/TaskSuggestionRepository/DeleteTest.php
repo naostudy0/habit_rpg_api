@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Repositories\TaskSuggestionRepository;
 
+use App\Infrastructure\Repositories\EloquentTaskSuggestionRepository;
 use App\Models\TaskSuggestion;
 use App\Models\User;
-use App\Repositories\TaskSuggestionRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,12 +12,12 @@ class DeleteTest extends TestCase
 {
     use RefreshDatabase;
 
-    private TaskSuggestionRepository $task_suggestion_repository;
+    private EloquentTaskSuggestionRepository $task_suggestion_repository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->task_suggestion_repository = app(TaskSuggestionRepository::class);
+        $this->task_suggestion_repository = app(EloquentTaskSuggestionRepository::class);
     }
 
     /**
@@ -33,8 +33,14 @@ class DeleteTest extends TestCase
             'user_id' => $user->user_id,
         ]);
 
+        $domain_suggestion = $this->task_suggestion_repository->findByUuidAndUserId(
+            $suggestion->task_suggestion_uuid,
+            $user->user_id
+        );
+        $this->assertNotNull($domain_suggestion);
+
         // 提案を削除
-        $result = $this->task_suggestion_repository->delete($suggestion);
+        $result = $this->task_suggestion_repository->delete($domain_suggestion);
 
         // 検証
         $this->assertTrue($result);
@@ -58,8 +64,14 @@ class DeleteTest extends TestCase
             'user_id' => $user->user_id,
         ]);
 
+        $domain_suggestion = $this->task_suggestion_repository->findByUuidAndUserId(
+            $suggestion->task_suggestion_uuid,
+            $user->user_id
+        );
+        $this->assertNotNull($domain_suggestion);
+
         // 提案を削除
-        $this->task_suggestion_repository->delete($suggestion);
+        $this->task_suggestion_repository->delete($domain_suggestion);
 
         // 削除された提案はデータベースに存在しないことを確認
         $this->assertDatabaseMissing('task_suggestions', [

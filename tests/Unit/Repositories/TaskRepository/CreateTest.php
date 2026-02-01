@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Repositories\TaskRepository;
 
-use App\Models\Task;
+use App\Domain\Entities\Task;
+use App\Infrastructure\Repositories\EloquentTaskRepository;
 use App\Models\User;
-use App\Repositories\TaskRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,12 +12,12 @@ class CreateTest extends TestCase
 {
     use RefreshDatabase;
 
-    private TaskRepository $task_repository;
+    private EloquentTaskRepository $task_repository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->task_repository = app(TaskRepository::class);
+        $this->task_repository = app(EloquentTaskRepository::class);
     }
 
     /**
@@ -28,27 +28,35 @@ class CreateTest extends TestCase
         // テストユーザーを作成
         $user = User::factory()->create();
 
-        // 予定データを作成
         $task_data = [
-            'user_id' => $user->user_id,
             'title' => 'テスト予定',
             'scheduled_date' => '2025-12-20',
             'scheduled_time' => '10:00:00',
             'memo' => 'テストメモ',
-            'is_completed' => false,
         ];
 
         // 予定を作成
-        $task = $this->task_repository->create($task_data);
+        $task = $this->task_repository->create(new Task(
+            null,
+            '',
+            $user->user_id,
+            $task_data['title'],
+            $task_data['scheduled_date'],
+            $task_data['scheduled_time'],
+            $task_data['memo'],
+            false,
+            null,
+            null
+        ));
 
         // 検証
         $this->assertInstanceOf(Task::class, $task);
-        $this->assertEquals($task_data['title'], $task->title);
-        $this->assertEquals($task_data['scheduled_date'], $task->scheduled_date->format('Y-m-d'));
-        $this->assertEquals($task_data['scheduled_time'], $task->scheduled_time);
-        $this->assertEquals($task_data['memo'], $task->memo);
-        $this->assertFalse($task->is_completed);
-        $this->assertNotNull($task->task_uuid);
+        $this->assertEquals($task_data['title'], $task->getTitle());
+        $this->assertEquals($task_data['scheduled_date'], $task->getScheduledDate());
+        $this->assertEquals($task_data['scheduled_time'], $task->getScheduledTime());
+        $this->assertEquals($task_data['memo'], $task->getMemo());
+        $this->assertFalse($task->isCompleted());
+        $this->assertNotNull($task->getTaskUuid());
     }
 
     /**
@@ -59,9 +67,7 @@ class CreateTest extends TestCase
         // テストユーザーを作成
         $user = User::factory()->create();
 
-        // 予定データを作成（メモなし）
         $task_data = [
-            'user_id' => $user->user_id,
             'title' => 'テスト予定',
             'scheduled_date' => '2025-12-20',
             'scheduled_time' => '10:00:00',
@@ -69,11 +75,22 @@ class CreateTest extends TestCase
         ];
 
         // 予定を作成
-        $task = $this->task_repository->create($task_data);
+        $task = $this->task_repository->create(new Task(
+            null,
+            '',
+            $user->user_id,
+            $task_data['title'],
+            $task_data['scheduled_date'],
+            $task_data['scheduled_time'],
+            $task_data['memo'],
+            false,
+            null,
+            null
+        ));
 
         // 検証
         $this->assertInstanceOf(Task::class, $task);
-        $this->assertNull($task->memo);
+        $this->assertNull($task->getMemo());
     }
 
     /**
@@ -84,28 +101,36 @@ class CreateTest extends TestCase
         // テストユーザーを作成
         $user = User::factory()->create();
 
-        // 予定データを作成
         $task_data = [
-            'user_id' => $user->user_id,
             'title' => 'テスト予定',
             'scheduled_date' => '2025-12-20',
             'scheduled_time' => '10:00:00',
             'memo' => 'テストメモ',
-            'is_completed' => false,
         ];
 
         // 予定を作成
-        $task = $this->task_repository->create($task_data);
+        $task = $this->task_repository->create(new Task(
+            null,
+            '',
+            $user->user_id,
+            $task_data['title'],
+            $task_data['scheduled_date'],
+            $task_data['scheduled_time'],
+            $task_data['memo'],
+            false,
+            null,
+            null
+        ));
 
         // データベースに正しく保存されていることを確認
         $this->assertDatabaseHas('tasks', [
-            'task_id' => $task->task_id,
+            'task_id' => $task->getTaskId(),
             'user_id' => $user->user_id,
             'title' => $task_data['title'],
             'scheduled_date' => $task_data['scheduled_date'],
             'scheduled_time' => $task_data['scheduled_time'],
             'memo' => $task_data['memo'],
-            'is_completed' => $task_data['is_completed'],
+            'is_completed' => false,
         ]);
     }
 }

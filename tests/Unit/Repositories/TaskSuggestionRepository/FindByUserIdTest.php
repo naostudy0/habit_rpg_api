@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Repositories\TaskSuggestionRepository;
 
+use App\Infrastructure\Repositories\EloquentTaskSuggestionRepository;
 use App\Models\TaskSuggestion;
 use App\Models\User;
-use App\Repositories\TaskSuggestionRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,12 +12,12 @@ class FindByUserIdTest extends TestCase
 {
     use RefreshDatabase;
 
-    private TaskSuggestionRepository $task_suggestion_repository;
+    private EloquentTaskSuggestionRepository $task_suggestion_repository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->task_suggestion_repository = app(TaskSuggestionRepository::class);
+        $this->task_suggestion_repository = app(EloquentTaskSuggestionRepository::class);
     }
 
     /**
@@ -48,9 +48,9 @@ class FindByUserIdTest extends TestCase
         // 検証
         $this->assertCount(3, $result);
         // 作成日時の降順でソートされていること
-        $this->assertEquals($suggestion3->task_suggestion_id, $result[0]->task_suggestion_id);
-        $this->assertEquals($suggestion2->task_suggestion_id, $result[1]->task_suggestion_id);
-        $this->assertEquals($suggestion1->task_suggestion_id, $result[2]->task_suggestion_id);
+        $this->assertEquals($suggestion3->task_suggestion_id, $result[0]->getTaskSuggestionId());
+        $this->assertEquals($suggestion2->task_suggestion_id, $result[1]->getTaskSuggestionId());
+        $this->assertEquals($suggestion1->task_suggestion_id, $result[2]->getTaskSuggestionId());
     }
 
     /**
@@ -63,7 +63,7 @@ class FindByUserIdTest extends TestCase
 
         // 検証
         $this->assertCount(0, $result);
-        $this->assertTrue($result->isEmpty());
+        $this->assertTrue(empty($result));
     }
 
     /**
@@ -88,8 +88,8 @@ class FindByUserIdTest extends TestCase
 
         // 検証
         $this->assertCount(1, $result);
-        $this->assertEquals($suggestion1->task_suggestion_id, $result[0]->task_suggestion_id);
-        $this->assertNotEquals($suggestion2->task_suggestion_id, $result[0]->task_suggestion_id);
+        $this->assertEquals($suggestion1->task_suggestion_id, $result[0]->getTaskSuggestionId());
+        $this->assertNotEquals($suggestion2->task_suggestion_id, $result[0]->getTaskSuggestionId());
     }
 
     /**
@@ -105,6 +105,6 @@ class FindByUserIdTest extends TestCase
 
         // 検証
         $this->assertCount(0, $result);
-        $this->assertTrue($result->isEmpty());
+        $this->assertTrue(empty($result));
     }
 }

@@ -2,9 +2,10 @@
 
 namespace Tests\Unit\Repositories\TaskSuggestionRepository;
 
+use App\Domain\Entities\TaskSuggestion as DomainTaskSuggestion;
+use App\Infrastructure\Repositories\EloquentTaskSuggestionRepository;
 use App\Models\TaskSuggestion;
 use App\Models\User;
-use App\Repositories\TaskSuggestionRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,12 +13,12 @@ class FindByUuidAndUserIdTest extends TestCase
 {
     use RefreshDatabase;
 
-    private TaskSuggestionRepository $task_suggestion_repository;
+    private EloquentTaskSuggestionRepository $task_suggestion_repository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->task_suggestion_repository = app(TaskSuggestionRepository::class);
+        $this->task_suggestion_repository = app(EloquentTaskSuggestionRepository::class);
     }
 
     /**
@@ -41,10 +42,10 @@ class FindByUuidAndUserIdTest extends TestCase
 
         // 検証
         $this->assertNotNull($result);
-        $this->assertInstanceOf(TaskSuggestion::class, $result);
-        $this->assertEquals($suggestion->task_suggestion_id, $result->task_suggestion_id);
-        $this->assertEquals($suggestion->task_suggestion_uuid, $result->task_suggestion_uuid);
-        $this->assertEquals($user->user_id, $result->user_id);
+        $this->assertInstanceOf(DomainTaskSuggestion::class, $result);
+        $this->assertEquals($suggestion->task_suggestion_id, $result->getTaskSuggestionId());
+        $this->assertEquals($suggestion->task_suggestion_uuid, $result->getTaskSuggestionUuid());
+        $this->assertEquals($user->user_id, $result->getUserId());
     }
 
     /**
@@ -111,7 +112,7 @@ class FindByUuidAndUserIdTest extends TestCase
             $user1->user_id
         );
         $this->assertNotNull($result1);
-        $this->assertEquals($suggestion1->task_suggestion_id, $result1->task_suggestion_id);
+        $this->assertEquals($suggestion1->task_suggestion_id, $result1->getTaskSuggestionId());
 
         // user1でuser2の提案を取得（失敗）
         $result2 = $this->task_suggestion_repository->findByUuidAndUserId(

@@ -2,9 +2,10 @@
 
 namespace Tests\Unit\Repositories\TaskRepository;
 
+use App\Domain\Entities\Task as DomainTask;
+use App\Infrastructure\Repositories\EloquentTaskRepository;
 use App\Models\Task;
 use App\Models\User;
-use App\Repositories\TaskRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,12 +13,12 @@ class UpdateCompletionTest extends TestCase
 {
     use RefreshDatabase;
 
-    private TaskRepository $task_repository;
+    private EloquentTaskRepository $task_repository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->task_repository = app(TaskRepository::class);
+        $this->task_repository = app(EloquentTaskRepository::class);
     }
 
     /**
@@ -34,13 +35,16 @@ class UpdateCompletionTest extends TestCase
             'is_completed' => false,
         ]);
 
+        $domain_task = $this->task_repository->findByUuidAndUserId($task->task_uuid, $user->user_id);
+        $this->assertNotNull($domain_task);
+
         // 完了状態をtrueに更新
-        $result = $this->task_repository->updateCompletion($task, true);
+        $result = $this->task_repository->updateCompletion($domain_task, true);
 
         // 検証
-        $this->assertInstanceOf(Task::class, $result);
-        $this->assertTrue($result->is_completed);
-        $this->assertEquals($task->task_id, $result->task_id);
+        $this->assertInstanceOf(DomainTask::class, $result);
+        $this->assertTrue($result->isCompleted());
+        $this->assertEquals($task->task_id, $result->getTaskId());
 
         // データベースに正しく保存されていることを確認
         $this->assertDatabaseHas('tasks', [
@@ -63,13 +67,16 @@ class UpdateCompletionTest extends TestCase
             'is_completed' => true,
         ]);
 
+        $domain_task = $this->task_repository->findByUuidAndUserId($task->task_uuid, $user->user_id);
+        $this->assertNotNull($domain_task);
+
         // 完了状態をfalseに更新
-        $result = $this->task_repository->updateCompletion($task, false);
+        $result = $this->task_repository->updateCompletion($domain_task, false);
 
         // 検証
-        $this->assertInstanceOf(Task::class, $result);
-        $this->assertFalse($result->is_completed);
-        $this->assertEquals($task->task_id, $result->task_id);
+        $this->assertInstanceOf(DomainTask::class, $result);
+        $this->assertFalse($result->isCompleted());
+        $this->assertEquals($task->task_id, $result->getTaskId());
 
         // データベースに正しく保存されていることを確認
         $this->assertDatabaseHas('tasks', [
@@ -92,12 +99,14 @@ class UpdateCompletionTest extends TestCase
             'is_completed' => false,
         ]);
 
+        $domain_task = $this->task_repository->findByUuidAndUserId($task->task_uuid, $user->user_id);
+        $this->assertNotNull($domain_task);
+
         // 完了状態を更新
-        $result = $this->task_repository->updateCompletion($task, true);
+        $result = $this->task_repository->updateCompletion($domain_task, true);
 
         // 検証
-        $this->assertSame($task, $result);
-        $this->assertTrue($result->is_completed);
+        $this->assertTrue($result->isCompleted());
     }
 
     /**
@@ -114,19 +123,22 @@ class UpdateCompletionTest extends TestCase
             'is_completed' => false,
         ]);
 
-        $original_title = $task->title;
-        $original_scheduled_date = $task->scheduled_date;
-        $original_scheduled_time = $task->scheduled_time;
-        $original_memo = $task->memo;
+        $domain_task = $this->task_repository->findByUuidAndUserId($task->task_uuid, $user->user_id);
+        $this->assertNotNull($domain_task);
+
+        $original_title = $domain_task->getTitle();
+        $original_scheduled_date = $domain_task->getScheduledDate();
+        $original_scheduled_time = $domain_task->getScheduledTime();
+        $original_memo = $domain_task->getMemo();
 
         // 完了状態を更新
-        $result = $this->task_repository->updateCompletion($task, true);
+        $result = $this->task_repository->updateCompletion($domain_task, true);
 
         // 検証
-        $this->assertEquals($original_title, $result->title);
-        $this->assertEquals($original_scheduled_date->format('Y-m-d'), $result->scheduled_date->format('Y-m-d'));
-        $this->assertEquals($original_scheduled_time, $result->scheduled_time);
-        $this->assertEquals($original_memo, $result->memo);
-        $this->assertTrue($result->is_completed);
+        $this->assertEquals($original_title, $result->getTitle());
+        $this->assertEquals($original_scheduled_date, $result->getScheduledDate());
+        $this->assertEquals($original_scheduled_time, $result->getScheduledTime());
+        $this->assertEquals($original_memo, $result->getMemo());
+        $this->assertTrue($result->isCompleted());
     }
 }

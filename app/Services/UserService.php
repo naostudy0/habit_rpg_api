@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Repositories\UserRepository;
+use App\Domain\Entities\User;
+use App\Domain\Repositories\UserRepositoryInterface;
 
 class UserService
 {
-    private UserRepository $user_repository;
+    private UserRepositoryInterface $user_repository;
 
-    public function __construct(UserRepository $user_repository)
+    public function __construct(UserRepositoryInterface $user_repository)
     {
         $this->user_repository = $user_repository;
     }
@@ -29,28 +29,18 @@ class UserService
             return null;
         }
 
-        // 更新データを準備
-        $update_data = [];
-
-        if (isset($data['name'])) {
-            $update_data['name'] = $data['name'];
-        }
-
-        if (isset($data['password'])) {
-            // ハッシュ化はミューテタで行われる
-            $update_data['password'] = $data['password'];
-        }
-
-        if (isset($data['is_dark_mode'])) {
-            $update_data['is_dark_mode'] = $data['is_dark_mode'];
-        }
-
-        if (isset($data['is_24_hour_format'])) {
-            $update_data['is_24_hour_format'] = $data['is_24_hour_format'];
-        }
+        $updated_user = new User(
+            $user->getUserId(),
+            $user->getUserUuid(),
+            $data['name'] ?? $user->getName(),
+            $user->getEmail(),
+            $data['password'] ?? null,
+            $data['is_dark_mode'] ?? $user->isDarkMode(),
+            $data['is_24_hour_format'] ?? $user->is24HourFormat()
+        );
 
         // ユーザーを更新
-        $user = $this->user_repository->update($user, $update_data);
+        $user = $this->user_repository->update($updated_user);
 
         // ユーザーをAPIレスポンス形式に変換して返す
         return $this->formatUserForApi($user);
@@ -65,11 +55,11 @@ class UserService
     private function formatUserForApi(User $user): array
     {
         return [
-            'user_uuid' => $user->user_uuid,
-            'name' => $user->name,
-            'email' => $user->email,
-            'is_dark_mode' => $user->is_dark_mode,
-            'is_24_hour_format' => $user->is_24_hour_format,
+            'user_uuid' => $user->getUserUuid(),
+            'name' => $user->getName(),
+            'email' => $user->getEmail(),
+            'is_dark_mode' => $user->isDarkMode(),
+            'is_24_hour_format' => $user->is24HourFormat(),
         ];
     }
 }

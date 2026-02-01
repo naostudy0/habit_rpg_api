@@ -18,7 +18,7 @@ class User
     private bool $is_24_hour_format;
 
     /**
-     * @param string|null $password_hash ハッシュ済みパスワード
+     * @param string|null $password_hash ハッシュ済みパスワード（更新時は生パスワード）
      */
     public function __construct(
         ?int $user_id,
