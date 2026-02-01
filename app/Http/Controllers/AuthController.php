@@ -3,17 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Auth\LoginRequest;
-use App\Models\User;
-use App\Services\AuthService;
+use App\Presenters\Auth\LoginPresenter;
+use App\UseCases\Auth\LoginInput;
+use App\UseCases\Auth\LoginUseCase;
 use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
-    private AuthService $auth_service;
+    private LoginUseCase $login_use_case;
+    private LoginPresenter $login_presenter;
 
-    public function __construct(AuthService $auth_service)
+    public function __construct(LoginUseCase $login_use_case, LoginPresenter $login_presenter)
     {
-        $this->auth_service = $auth_service;
+        $this->login_use_case = $login_use_case;
+        $this->login_presenter = $login_presenter;
     }
 
     /**
@@ -26,39 +29,12 @@ class AuthController extends Controller
     {
         $credentials = $request->validated();
 
-        // 認証処理
-        $user = $this->auth_service->authenticate(
+        $input = new LoginInput(
             $credentials['email'],
             $credentials['password']
         );
+        $result = $this->login_use_case->handle($input);
 
-        // 認証失敗時
-        if (!$user) {
-            return response()->json([
-                'message' => '認証に失敗しました。',
-                'errors' => [
-                    'email' => ['メールアドレスまたはパスワードが正しくありません。'],
-                ],
-            ], 401);
-        }
-
-        // トークンを生成
-        $auth_user = User::where('user_id', $user->getUserId())->first();
-        if (!$auth_user) {
-            return response()->json([
-                'message' => '認証に失敗しました。',
-                'errors' => [
-                    'email' => ['メールアドレスまたはパスワードが正しくありません。'],
-                ],
-            ], 401);
-        }
-        $token = $auth_user->createToken('auth-token')->plainTextToken;
-
-        // 認証成功時
-        return response()->json([
-            'result' => true,
-            'data' => $auth_user,
-            'token' => $token,
-        ], 200);
+        return $this->login_presenter->present($result);
     }
 }

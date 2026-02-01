@@ -2,17 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\TaskSuggestionService;
+use App\Presenters\TaskSuggestions\DeleteTaskSuggestionPresenter;
+use App\Presenters\TaskSuggestions\GetTaskSuggestionsPresenter;
+use App\UseCases\TaskSuggestions\DeleteTaskSuggestionInput;
+use App\UseCases\TaskSuggestions\DeleteTaskSuggestionUseCase;
+use App\UseCases\TaskSuggestions\GetTaskSuggestionsInput;
+use App\UseCases\TaskSuggestions\GetTaskSuggestionsUseCase;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TaskSuggestionController extends Controller
 {
-    private TaskSuggestionService $task_suggestion_service;
+    private GetTaskSuggestionsUseCase $get_task_suggestions_use_case;
+    private GetTaskSuggestionsPresenter $get_task_suggestions_presenter;
+    private DeleteTaskSuggestionUseCase $delete_task_suggestion_use_case;
+    private DeleteTaskSuggestionPresenter $delete_task_suggestion_presenter;
 
-    public function __construct(TaskSuggestionService $task_suggestion_service)
-    {
-        $this->task_suggestion_service = $task_suggestion_service;
+    public function __construct(
+        GetTaskSuggestionsUseCase $get_task_suggestions_use_case,
+        GetTaskSuggestionsPresenter $get_task_suggestions_presenter,
+        DeleteTaskSuggestionUseCase $delete_task_suggestion_use_case,
+        DeleteTaskSuggestionPresenter $delete_task_suggestion_presenter
+    ) {
+        $this->get_task_suggestions_use_case = $get_task_suggestions_use_case;
+        $this->get_task_suggestions_presenter = $get_task_suggestions_presenter;
+        $this->delete_task_suggestion_use_case = $delete_task_suggestion_use_case;
+        $this->delete_task_suggestion_presenter = $delete_task_suggestion_presenter;
     }
 
     /**
@@ -25,12 +40,10 @@ class TaskSuggestionController extends Controller
     {
         // 認証済みユーザーの提案を取得
         $user = $request->user();
-        $suggestions = $this->task_suggestion_service->getSuggestionsForApi($user->user_id);
+        $input = new GetTaskSuggestionsInput($user->user_id);
+        $result = $this->get_task_suggestions_use_case->handle($input);
 
-        return response()->json([
-            'result' => true,
-            'data' => $suggestions,
-        ], 200);
+        return $this->get_task_suggestions_presenter->present($result);
     }
 
     /**
@@ -42,21 +55,12 @@ class TaskSuggestionController extends Controller
      */
     public function destroy(Request $request, string $uuid): JsonResponse
     {
-        $deleted = $this->task_suggestion_service->deleteSuggestion(
+        $input = new DeleteTaskSuggestionInput(
             $uuid,
             $request->user()->user_id
         );
+        $result = $this->delete_task_suggestion_use_case->handle($input);
 
-        if (!$deleted) {
-            return response()->json([
-                'result' => false,
-                'message' => '提案が見つかりません',
-            ], 404);
-        }
-
-        return response()->json([
-            'result' => true,
-            'message' => '提案を削除しました',
-        ], 200);
+        return $this->delete_task_suggestion_presenter->present($result);
     }
 }

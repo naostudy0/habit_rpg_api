@@ -3,9 +3,9 @@
 namespace App\Domain\Entities;
 
 /**
- * ドメイン層の予定提案を表すエンティティ。
+ * ドメイン層の予定提案を表すエンティティ
  *
- * タイトルとメモを保持する。
+ * タイトルとメモを保持する
  */
 class TaskSuggestion
 {

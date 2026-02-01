@@ -3,17 +3,32 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\User\UpdateUserRequest;
-use App\Services\UserService;
+use App\Presenters\Users\ShowUserPresenter;
+use App\Presenters\Users\UpdateUserPresenter;
+use App\UseCases\Users\ShowUserInput;
+use App\UseCases\Users\ShowUserUseCase;
+use App\UseCases\Users\UpdateUserInput;
+use App\UseCases\Users\UpdateUserUseCase;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    private UserService $user_service;
+    private ShowUserUseCase $show_user_use_case;
+    private ShowUserPresenter $show_user_presenter;
+    private UpdateUserUseCase $update_user_use_case;
+    private UpdateUserPresenter $update_user_presenter;
 
-    public function __construct(UserService $user_service)
-    {
-        $this->user_service = $user_service;
+    public function __construct(
+        ShowUserUseCase $show_user_use_case,
+        ShowUserPresenter $show_user_presenter,
+        UpdateUserUseCase $update_user_use_case,
+        UpdateUserPresenter $update_user_presenter
+    ) {
+        $this->show_user_use_case = $show_user_use_case;
+        $this->show_user_presenter = $show_user_presenter;
+        $this->update_user_use_case = $update_user_use_case;
+        $this->update_user_presenter = $update_user_presenter;
     }
 
     /**
@@ -25,16 +40,10 @@ class UserController extends Controller
     {
         $user = Auth::user();
 
-        return response()->json([
-            'result' => true,
-            'data' => [
-                'user_uuid' => $user->user_uuid,
-                'name' => $user->name,
-                'email' => $user->email,
-                'is_dark_mode' => $user->is_dark_mode,
-                'is_24_hour_format' => $user->is_24_hour_format,
-            ],
-        ], 200);
+        $input = new ShowUserInput($user->user_id);
+        $result = $this->show_user_use_case->handle($input);
+
+        return $this->show_user_presenter->present($result);
     }
 
     /**
@@ -45,15 +54,12 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request): JsonResponse
     {
-        $user = $this->user_service->updateUser(
+        $input = new UpdateUserInput(
             $request->user()->user_id,
             $request->validated()
         );
+        $result = $this->update_user_use_case->handle($input);
 
-        return response()->json([
-            'result' => true,
-            'message' => 'ユーザー情報を更新しました',
-            'data' => $user,
-        ], 200);
+        return $this->update_user_presenter->present($result);
     }
 }
