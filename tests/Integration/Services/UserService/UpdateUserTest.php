@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Services\UserService;
+namespace Tests\Integration\Services\UserService;
 
 use App\Models\User;
 use App\Services\UserService;
