@@ -1,0 +1,7 @@
+language: ja
+
+reviews:
+  auto: true
+  branches:
+    include:
+      - "*"
