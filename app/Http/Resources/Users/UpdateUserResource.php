@@ -26,8 +26,13 @@ class UpdateUserResource
             return ApiResponseResource::error('ユーザー情報の更新に失敗しました', 400);
         }
 
+        $user = $output->getUser();
+        if ($user === null) {
+            return ApiResponseResource::error('ユーザーが見つかりません', 404);
+        }
+
         return ApiResponseResource::success(
-            $output->getUser(),
+            $user,
             'ユーザー情報を更新しました',
             200
         );

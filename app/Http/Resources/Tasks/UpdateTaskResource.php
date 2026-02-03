@@ -26,8 +26,13 @@ class UpdateTaskResource
             return ApiResponseResource::error('予定の更新に失敗しました', 400);
         }
 
+        $task = $output->getTask();
+        if ($task === null) {
+            return ApiResponseResource::error('予定の更新に失敗しました', 400);
+        }
+
         return ApiResponseResource::success(
-            $output->getTask(),
+            $task,
             '予定を更新しました',
             200
         );
