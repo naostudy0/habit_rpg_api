@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Auth\LoginRequest;
-use App\Presenters\Auth\LoginPresenter;
+use App\Http\Resources\Auth\LoginResource;
 use App\UseCases\Auth\LoginInput;
 use App\UseCases\Auth\LoginUseCase;
 use Illuminate\Http\JsonResponse;
@@ -11,12 +11,10 @@ use Illuminate\Http\JsonResponse;
 class AuthController extends Controller
 {
     private LoginUseCase $login_use_case;
-    private LoginPresenter $login_presenter;
 
-    public function __construct(LoginUseCase $login_use_case, LoginPresenter $login_presenter)
+    public function __construct(LoginUseCase $login_use_case)
     {
         $this->login_use_case = $login_use_case;
-        $this->login_presenter = $login_presenter;
     }
 
     /**
@@ -35,6 +33,6 @@ class AuthController extends Controller
         );
         $result = $this->login_use_case->handle($input);
 
-        return $this->login_presenter->present($result);
+        return LoginResource::fromResult($result);
     }
 }

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\User\UpdateUserRequest;
-use App\Presenters\Users\ShowUserPresenter;
-use App\Presenters\Users\UpdateUserPresenter;
+use App\Http\Resources\Users\ShowUserResource;
+use App\Http\Resources\Users\UpdateUserResource;
 use App\UseCases\Users\ShowUserInput;
 use App\UseCases\Users\ShowUserUseCase;
 use App\UseCases\Users\UpdateUserInput;
@@ -15,20 +15,14 @@ use Illuminate\Support\Facades\Auth;
 class UserController extends Controller
 {
     private ShowUserUseCase $show_user_use_case;
-    private ShowUserPresenter $show_user_presenter;
     private UpdateUserUseCase $update_user_use_case;
-    private UpdateUserPresenter $update_user_presenter;
 
     public function __construct(
         ShowUserUseCase $show_user_use_case,
-        ShowUserPresenter $show_user_presenter,
-        UpdateUserUseCase $update_user_use_case,
-        UpdateUserPresenter $update_user_presenter
+        UpdateUserUseCase $update_user_use_case
     ) {
         $this->show_user_use_case = $show_user_use_case;
-        $this->show_user_presenter = $show_user_presenter;
         $this->update_user_use_case = $update_user_use_case;
-        $this->update_user_presenter = $update_user_presenter;
     }
 
     /**
@@ -43,7 +37,7 @@ class UserController extends Controller
         $input = new ShowUserInput($user->user_id);
         $result = $this->show_user_use_case->handle($input);
 
-        return $this->show_user_presenter->present($result);
+        return ShowUserResource::fromResult($result);
     }
 
     /**
@@ -60,6 +54,6 @@ class UserController extends Controller
         );
         $result = $this->update_user_use_case->handle($input);
 
-        return $this->update_user_presenter->present($result);
+        return UpdateUserResource::fromResult($result);
     }
 }
