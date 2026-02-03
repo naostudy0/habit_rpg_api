@@ -6,11 +6,11 @@ use App\Http\Requests\Task\DeleteTaskRequest;
 use App\Http\Requests\Task\StoreTaskRequest;
 use App\Http\Requests\Task\ToggleCompleteTaskRequest;
 use App\Http\Requests\Task\UpdateTaskRequest;
-use App\Presenters\Tasks\CreateTaskPresenter;
-use App\Presenters\Tasks\DeleteTaskPresenter;
-use App\Presenters\Tasks\GetTasksPresenter;
-use App\Presenters\Tasks\ToggleCompleteTaskPresenter;
-use App\Presenters\Tasks\UpdateTaskPresenter;
+use App\Http\Resources\Tasks\CreateTaskResource;
+use App\Http\Resources\Tasks\DeleteTaskResource;
+use App\Http\Resources\Tasks\GetTasksResource;
+use App\Http\Resources\Tasks\ToggleCompleteTaskResource;
+use App\Http\Resources\Tasks\UpdateTaskResource;
 use App\UseCases\Tasks\CreateTaskInput;
 use App\UseCases\Tasks\CreateTaskUseCase;
 use App\UseCases\Tasks\DeleteTaskInput;
@@ -27,38 +27,23 @@ use Illuminate\Http\Request;
 class TaskController extends Controller
 {
     private GetTasksUseCase $get_tasks_use_case;
-    private GetTasksPresenter $get_tasks_presenter;
     private CreateTaskUseCase $create_task_use_case;
-    private CreateTaskPresenter $create_task_presenter;
     private UpdateTaskUseCase $update_task_use_case;
-    private UpdateTaskPresenter $update_task_presenter;
     private DeleteTaskUseCase $delete_task_use_case;
-    private DeleteTaskPresenter $delete_task_presenter;
     private ToggleCompleteTaskUseCase $toggle_complete_task_use_case;
-    private ToggleCompleteTaskPresenter $toggle_complete_task_presenter;
 
     public function __construct(
         GetTasksUseCase $get_tasks_use_case,
-        GetTasksPresenter $get_tasks_presenter,
         CreateTaskUseCase $create_task_use_case,
-        CreateTaskPresenter $create_task_presenter,
         UpdateTaskUseCase $update_task_use_case,
-        UpdateTaskPresenter $update_task_presenter,
         DeleteTaskUseCase $delete_task_use_case,
-        DeleteTaskPresenter $delete_task_presenter,
-        ToggleCompleteTaskUseCase $toggle_complete_task_use_case,
-        ToggleCompleteTaskPresenter $toggle_complete_task_presenter
+        ToggleCompleteTaskUseCase $toggle_complete_task_use_case
     ) {
         $this->get_tasks_use_case = $get_tasks_use_case;
-        $this->get_tasks_presenter = $get_tasks_presenter;
         $this->create_task_use_case = $create_task_use_case;
-        $this->create_task_presenter = $create_task_presenter;
         $this->update_task_use_case = $update_task_use_case;
-        $this->update_task_presenter = $update_task_presenter;
         $this->delete_task_use_case = $delete_task_use_case;
-        $this->delete_task_presenter = $delete_task_presenter;
         $this->toggle_complete_task_use_case = $toggle_complete_task_use_case;
-        $this->toggle_complete_task_presenter = $toggle_complete_task_presenter;
     }
 
     /**
@@ -74,7 +59,7 @@ class TaskController extends Controller
         $input = new GetTasksInput($user->user_id);
         $result = $this->get_tasks_use_case->handle($input);
 
-        return $this->get_tasks_presenter->present($result);
+        return GetTasksResource::fromResult($result);
     }
 
     /**
@@ -91,7 +76,7 @@ class TaskController extends Controller
         );
         $result = $this->create_task_use_case->handle($input);
 
-        return $this->create_task_presenter->present($result);
+        return CreateTaskResource::fromResult($result);
     }
 
     /**
@@ -110,7 +95,7 @@ class TaskController extends Controller
         );
         $result = $this->update_task_use_case->handle($input);
 
-        return $this->update_task_presenter->present($result);
+        return UpdateTaskResource::fromResult($result);
     }
 
     /**
@@ -128,7 +113,7 @@ class TaskController extends Controller
         );
         $result = $this->delete_task_use_case->handle($input);
 
-        return $this->delete_task_presenter->present($result);
+        return DeleteTaskResource::fromResult($result);
     }
 
     /**
@@ -149,6 +134,6 @@ class TaskController extends Controller
         );
         $result = $this->toggle_complete_task_use_case->handle($input);
 
-        return $this->toggle_complete_task_presenter->present($result);
+        return ToggleCompleteTaskResource::fromResult($result);
     }
 }

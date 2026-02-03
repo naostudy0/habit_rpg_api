@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Presenters\TaskSuggestions\DeleteTaskSuggestionPresenter;
-use App\Presenters\TaskSuggestions\GetTaskSuggestionsPresenter;
+use App\Http\Resources\TaskSuggestions\DeleteTaskSuggestionResource;
+use App\Http\Resources\TaskSuggestions\GetTaskSuggestionsResource;
 use App\UseCases\TaskSuggestions\DeleteTaskSuggestionInput;
 use App\UseCases\TaskSuggestions\DeleteTaskSuggestionUseCase;
 use App\UseCases\TaskSuggestions\GetTaskSuggestionsInput;
@@ -14,20 +14,14 @@ use Illuminate\Http\Request;
 class TaskSuggestionController extends Controller
 {
     private GetTaskSuggestionsUseCase $get_task_suggestions_use_case;
-    private GetTaskSuggestionsPresenter $get_task_suggestions_presenter;
     private DeleteTaskSuggestionUseCase $delete_task_suggestion_use_case;
-    private DeleteTaskSuggestionPresenter $delete_task_suggestion_presenter;
 
     public function __construct(
         GetTaskSuggestionsUseCase $get_task_suggestions_use_case,
-        GetTaskSuggestionsPresenter $get_task_suggestions_presenter,
-        DeleteTaskSuggestionUseCase $delete_task_suggestion_use_case,
-        DeleteTaskSuggestionPresenter $delete_task_suggestion_presenter
+        DeleteTaskSuggestionUseCase $delete_task_suggestion_use_case
     ) {
         $this->get_task_suggestions_use_case = $get_task_suggestions_use_case;
-        $this->get_task_suggestions_presenter = $get_task_suggestions_presenter;
         $this->delete_task_suggestion_use_case = $delete_task_suggestion_use_case;
-        $this->delete_task_suggestion_presenter = $delete_task_suggestion_presenter;
     }
 
     /**
@@ -43,7 +37,7 @@ class TaskSuggestionController extends Controller
         $input = new GetTaskSuggestionsInput($user->user_id);
         $result = $this->get_task_suggestions_use_case->handle($input);
 
-        return $this->get_task_suggestions_presenter->present($result);
+        return GetTaskSuggestionsResource::fromResult($result);
     }
 
     /**
@@ -61,6 +55,6 @@ class TaskSuggestionController extends Controller
         );
         $result = $this->delete_task_suggestion_use_case->handle($input);
 
-        return $this->delete_task_suggestion_presenter->present($result);
+        return DeleteTaskSuggestionResource::fromResult($result);
     }
 }
