@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Services\AuthService;
+namespace Tests\Integration\Services\AuthService;
 
 use App\Domain\Entities\User as DomainUser;
 use App\Models\User;

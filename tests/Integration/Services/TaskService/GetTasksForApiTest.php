@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Services\TaskService;
+namespace Tests\Integration\Services\TaskService;
 
 use App\Models\Task;
 use App\Models\User;
@@ -114,7 +114,7 @@ class GetTasksForApiTest extends TestCase
         $this->assertEquals($task->updated_at->toIso8601String(), $result[0]['updated_at']);
         // ISO8601形式の検証（例: 2025-12-15T10:30:00+00:00）
         $this->assertMatchesRegularExpression(
-            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/',
+            '/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}[+-]\\d{2}:\\d{2}$/',
             $result[0]['created_at']
         );
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Services\TaskSuggestionService;
+namespace Tests\Integration\Services\TaskSuggestionService;
 
 use App\Models\TaskSuggestion;
 use App\Models\User;

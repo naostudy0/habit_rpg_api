@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Services\AISuggestionService;
+namespace Tests\Integration\Services\AISuggestionService;
 
 use App\Services\AISuggestionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
