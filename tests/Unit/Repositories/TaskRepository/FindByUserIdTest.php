@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Repositories\TaskRepository;
 
+use App\Infrastructure\Repositories\EloquentTaskRepository;
 use App\Models\Task;
 use App\Models\User;
-use App\Repositories\TaskRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,12 +12,12 @@ class FindByUserIdTest extends TestCase
 {
     use RefreshDatabase;
 
-    private TaskRepository $task_repository;
+    private EloquentTaskRepository $task_repository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->task_repository = app(TaskRepository::class);
+        $this->task_repository = app(EloquentTaskRepository::class);
     }
 
     /**
@@ -51,9 +51,9 @@ class FindByUserIdTest extends TestCase
         // 検証
         $this->assertCount(3, $result);
         // ソート順の検証: scheduled_date昇順、scheduled_time昇順
-        $this->assertEquals($task2->task_id, $result[0]->task_id); // 2025-12-19 14:00:00
-        $this->assertEquals($task3->task_id, $result[1]->task_id); // 2025-12-20 09:00:00
-        $this->assertEquals($task1->task_id, $result[2]->task_id); // 2025-12-20 10:00:00
+        $this->assertEquals($task2->task_id, $result[0]->getTaskId()); // 2025-12-19 14:00:00
+        $this->assertEquals($task3->task_id, $result[1]->getTaskId()); // 2025-12-20 09:00:00
+        $this->assertEquals($task1->task_id, $result[2]->getTaskId()); // 2025-12-20 10:00:00
     }
 
     /**
@@ -66,7 +66,7 @@ class FindByUserIdTest extends TestCase
 
         // 検証
         $this->assertCount(0, $result);
-        $this->assertTrue($result->isEmpty());
+        $this->assertTrue(empty($result));
     }
 
     /**
@@ -91,8 +91,8 @@ class FindByUserIdTest extends TestCase
 
         // 検証
         $this->assertCount(1, $result);
-        $this->assertEquals($task1->task_id, $result[0]->task_id);
-        $this->assertNotEquals($task2->task_id, $result[0]->task_id);
+        $this->assertEquals($task1->task_id, $result[0]->getTaskId());
+        $this->assertNotEquals($task2->task_id, $result[0]->getTaskId());
     }
 
     /**
@@ -108,6 +108,6 @@ class FindByUserIdTest extends TestCase
 
         // 検証
         $this->assertCount(0, $result);
-        $this->assertTrue($result->isEmpty());
+        $this->assertTrue(empty($result));
     }
 }

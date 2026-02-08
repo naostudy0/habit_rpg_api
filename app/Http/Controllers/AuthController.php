@@ -3,16 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Auth\LoginRequest;
-use App\Services\AuthService;
+use App\Http\Resources\Auth\LoginResource;
+use App\UseCases\Auth\LoginInput;
+use App\UseCases\Auth\LoginUseCase;
 use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
-    private AuthService $auth_service;
+    private LoginUseCase $login_use_case;
 
-    public function __construct(AuthService $auth_service)
+    public function __construct(LoginUseCase $login_use_case)
     {
-        $this->auth_service = $auth_service;
+        $this->login_use_case = $login_use_case;
     }
 
     /**
@@ -25,30 +27,12 @@ class AuthController extends Controller
     {
         $credentials = $request->validated();
 
-        // 認証処理
-        $user = $this->auth_service->authenticate(
+        $input = new LoginInput(
             $credentials['email'],
             $credentials['password']
         );
+        $result = $this->login_use_case->handle($input);
 
-        // 認証失敗時
-        if (!$user) {
-            return response()->json([
-                'message' => '認証に失敗しました。',
-                'errors' => [
-                    'email' => ['メールアドレスまたはパスワードが正しくありません。'],
-                ],
-            ], 401);
-        }
-
-        // トークンを生成
-        $token = $user->createToken('auth-token')->plainTextToken;
-
-        // 認証成功時
-        return response()->json([
-            'result' => true,
-            'data' => $user,
-            'token' => $token,
-        ], 200);
+        return LoginResource::fromResult($result);
     }
 }

@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
-use App\Models\Task;
-use App\Repositories\TaskRepository;
+use App\Domain\Entities\Task;
+use App\Domain\Repositories\TaskRepositoryInterface;
 
 class TaskService
 {
-    private TaskRepository $task_repository;
+    private TaskRepositoryInterface $task_repository;
 
-    public function __construct(TaskRepository $task_repository)
+    public function __construct(TaskRepositoryInterface $task_repository)
     {
         $this->task_repository = $task_repository;
     }
@@ -25,9 +25,9 @@ class TaskService
         $tasks = $this->task_repository->findByUserId($user_id);
 
         // 予定をAPIレスポンス形式に変換して返す
-        return $tasks->map(function ($task) {
+        return array_map(function (Task $task): array {
             return $this->formatTaskForApi($task);
-        })->toArray();
+        }, $tasks);
     }
 
     /**
@@ -39,14 +39,19 @@ class TaskService
      */
     public function createTask(int $user_id, array $data): array
     {
-        $task = $this->task_repository->create([
-            'user_id' => $user_id,
-            'title' => $data['title'],
-            'scheduled_date' => $data['scheduled_date'],
-            'scheduled_time' => $data['scheduled_time'],
-            'memo' => $data['memo'] ?? null,
-            'is_completed' => false,
-        ]);
+        $task = new Task(
+            null,
+            '',
+            $user_id,
+            $data['title'],
+            $data['scheduled_date'],
+            $data['scheduled_time'],
+            $data['memo'] ?? null,
+            false,
+            null,
+            null
+        );
+        $task = $this->task_repository->create($task);
 
         // 予定をAPIレスポンス形式に変換して返す
         return $this->formatTaskForApi($task);
@@ -69,14 +74,20 @@ class TaskService
         }
 
         // 予定を更新
-        $update_data = [
-            'title' => $data['title'],
-            'scheduled_date' => $data['scheduled_date'],
-            'scheduled_time' => $data['scheduled_time'],
-            'memo' => $data['memo'] ?? null,
-        ];
+        $updated_task = new Task(
+            $task->getTaskId(),
+            $task->getTaskUuid(),
+            $task->getUserId(),
+            $data['title'],
+            $data['scheduled_date'],
+            $data['scheduled_time'],
+            $data['memo'] ?? null,
+            $task->isCompleted(),
+            $task->getCreatedAt(),
+            $task->getUpdatedAt()
+        );
 
-        $task = $this->task_repository->update($task, $update_data);
+        $task = $this->task_repository->update($updated_task);
 
         // 予定をAPIレスポンス形式に変換して返す
         return $this->formatTaskForApi($task);
@@ -129,8 +140,21 @@ class TaskService
             return [];
         }
 
+        $updated_task = new Task(
+            $task->getTaskId(),
+            $task->getTaskUuid(),
+            $task->getUserId(),
+            $task->getTitle(),
+            $task->getScheduledDate(),
+            $task->getScheduledTime(),
+            $task->getMemo(),
+            $is_completed,
+            $task->getCreatedAt(),
+            $task->getUpdatedAt()
+        );
+
         // 予定の完了状態を更新
-        $task = $this->task_repository->updateCompletion($task, $is_completed);
+        $task = $this->task_repository->updateCompletion($updated_task, $is_completed);
 
         // 予定をAPIレスポンス形式に変換して返す
         return $this->formatTaskForApi($task);
@@ -143,7 +167,7 @@ class TaskService
      */
     public function getUserIdsWithTasks(): array
     {
-        return $this->task_repository->getDistinctUserIds()->toArray();
+        return $this->task_repository->getDistinctUserIds();
     }
 
     /**
@@ -168,15 +192,15 @@ class TaskService
     {
         $tasks = $this->task_repository->findRecentTasksByUserId($user_id, $limit);
 
-        if ($tasks->isEmpty()) {
+        if (empty($tasks)) {
             return '予定はありません。';
         }
 
         $formatted = [];
         foreach ($tasks as $task) {
-            $formatted_line = $task->title;
-            if ($task->memo) {
-                $formatted_line .= "：{$task->memo}";
+            $formatted_line = $task->getTitle();
+            if ($task->getMemo()) {
+                $formatted_line .= "：{$task->getMemo()}";
             }
             $formatted[] = $formatted_line;
         }
@@ -193,14 +217,14 @@ class TaskService
     private function formatTaskForApi(Task $task): array
     {
         return [
-            'uuid' => $task->task_uuid,
-            'title' => $task->title,
-            'scheduled_date' => $task->scheduled_date->format('Y-m-d'),
-            'scheduled_time' => $task->scheduled_time,
-            'memo' => $task->memo,
-            'is_completed' => $task->is_completed,
-            'created_at' => $task->created_at->toIso8601String(),
-            'updated_at' => $task->updated_at->toIso8601String(),
+            'uuid' => $task->getTaskUuid(),
+            'title' => $task->getTitle(),
+            'scheduled_date' => $task->getScheduledDate(),
+            'scheduled_time' => $task->getScheduledTime(),
+            'memo' => $task->getMemo(),
+            'is_completed' => $task->isCompleted(),
+            'created_at' => $task->getCreatedAt(),
+            'updated_at' => $task->getUpdatedAt(),
         ];
     }
 }

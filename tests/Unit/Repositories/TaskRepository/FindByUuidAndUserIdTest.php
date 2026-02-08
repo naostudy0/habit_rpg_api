@@ -2,9 +2,10 @@
 
 namespace Tests\Unit\Repositories\TaskRepository;
 
+use App\Domain\Entities\Task as DomainTask;
+use App\Infrastructure\Repositories\EloquentTaskRepository;
 use App\Models\Task;
 use App\Models\User;
-use App\Repositories\TaskRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,12 +13,12 @@ class FindByUuidAndUserIdTest extends TestCase
 {
     use RefreshDatabase;
 
-    private TaskRepository $task_repository;
+    private EloquentTaskRepository $task_repository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->task_repository = app(TaskRepository::class);
+        $this->task_repository = app(EloquentTaskRepository::class);
     }
 
     /**
@@ -38,10 +39,10 @@ class FindByUuidAndUserIdTest extends TestCase
 
         // 検証
         $this->assertNotNull($result);
-        $this->assertInstanceOf(Task::class, $result);
-        $this->assertEquals($task->task_id, $result->task_id);
-        $this->assertEquals($task->task_uuid, $result->task_uuid);
-        $this->assertEquals($user->user_id, $result->user_id);
+        $this->assertInstanceOf(DomainTask::class, $result);
+        $this->assertEquals($task->task_id, $result->getTaskId());
+        $this->assertEquals($task->task_uuid, $result->getTaskUuid());
+        $this->assertEquals($user->user_id, $result->getUserId());
     }
 
     /**
@@ -102,7 +103,7 @@ class FindByUuidAndUserIdTest extends TestCase
         // user1でuser1の予定を取得（成功）
         $result1 = $this->task_repository->findByUuidAndUserId($task1->task_uuid, $user1->user_id);
         $this->assertNotNull($result1);
-        $this->assertEquals($task1->task_id, $result1->task_id);
+        $this->assertEquals($task1->task_id, $result1->getTaskId());
 
         // user1でuser2の予定を取得（失敗）
         $result2 = $this->task_repository->findByUuidAndUserId($task2->task_uuid, $user1->user_id);

@@ -55,6 +55,18 @@
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan test"
+        ],
+        "test:unit": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --testsuite=Unit"
+        ],
+        "test:integration": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --testsuite=Integration"
+        ],
+        "test:feature": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --testsuite=Feature"
         ]
     },
     "extra": {
