@@ -22,7 +22,7 @@ class DeleteTaskSuggestionUseCase implements UseCaseInterface
     public function handle(Input $input): Result
     {
         if (!$input instanceof DeleteTaskSuggestionInput) {
-            return Result::failure('INVALID_INPUT', '提案が見つかりません');
+            return Result::failure('INVALID_INPUT', '入力が不正です');
         }
 
         $deleted = $this->task_suggestion_service->deleteSuggestion(

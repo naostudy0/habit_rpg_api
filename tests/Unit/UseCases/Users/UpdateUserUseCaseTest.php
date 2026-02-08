@@ -36,9 +36,9 @@ class UpdateUserUseCaseTest extends TestCase
     }
 
     /**
-     * 更新対象が見つからない場合でも成功結果が返ること
+     * 更新対象が見つからない場合に失敗結果が返ること
      */
-    public function testHandleReturnsSuccessWhenUserNotFound(): void
+    public function testHandleReturnsFailureWhenUserNotFound(): void
     {
         $update_data = ['name' => '更新後'];
 
@@ -51,11 +51,10 @@ class UpdateUserUseCaseTest extends TestCase
         $use_case = new UpdateUserUseCase($user_service);
         $result = $use_case->handle(new UpdateUserInput(1, $update_data));
 
-        $this->assertTrue($result->isSuccess());
-        /** @var UpdateUserOutput $output */
-        $output = $result->getOutput();
-        $this->assertInstanceOf(UpdateUserOutput::class, $output);
-        $this->assertNull($output->getUser());
+        $this->assertFalse($result->isSuccess());
+        $this->assertSame('NOT_FOUND', $result->getErrorCode());
+        $this->assertSame('ユーザーが見つかりません', $result->getErrorMessage());
+        $this->assertNull($result->getOutput());
     }
 
     /**

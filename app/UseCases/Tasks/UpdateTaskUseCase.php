@@ -31,6 +31,10 @@ class UpdateTaskUseCase implements UseCaseInterface
             $input->getData()
         );
 
+        if ($task === null) {
+            return Result::failure('NOT_FOUND', '予定が見つかりませんでした');
+        }
+
         return Result::success(new UpdateTaskOutput($task));
     }
 }

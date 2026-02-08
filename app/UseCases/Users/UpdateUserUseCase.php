@@ -27,6 +27,10 @@ class UpdateUserUseCase implements UseCaseInterface
 
         $user = $this->user_service->updateUser($input->getUserId(), $input->getData());
 
+        if ($user === null) {
+            return Result::failure('NOT_FOUND', 'ユーザーが見つかりません');
+        }
+
         return Result::success(new UpdateUserOutput($user));
     }
 }

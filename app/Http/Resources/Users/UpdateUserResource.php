@@ -15,9 +15,11 @@ class UpdateUserResource
     public static function fromResult(Result $result): JsonResponse
     {
         if (!$result->isSuccess()) {
+            $status = $result->getErrorCode() === 'NOT_FOUND' ? 404 : 400;
+
             return ApiResponseResource::error(
                 $result->getErrorMessage() ?? 'ユーザー情報の更新に失敗しました',
-                400
+                $status
             );
         }
 

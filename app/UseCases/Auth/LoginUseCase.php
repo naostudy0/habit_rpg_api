@@ -32,8 +32,12 @@ class LoginUseCase implements UseCaseInterface
             return Result::failure('AUTH_FAILED', '認証に失敗しました。');
         }
 
+        if ($user->getUserId() === null) {
+            return Result::failure('INVALID_USER_ID', '有効な user_id がありません');
+        }
+
         try {
-            $token = $this->token_issuer->issueToken($user->getUserId() ?? 0);
+            $token = $this->token_issuer->issueToken($user->getUserId());
         } catch (\Throwable $e) {
             return Result::failure('TOKEN_FAILED', '認証に失敗しました。');
         }

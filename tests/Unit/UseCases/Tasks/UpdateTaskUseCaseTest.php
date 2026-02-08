@@ -40,9 +40,9 @@ class UpdateTaskUseCaseTest extends TestCase
     }
 
     /**
-     * 更新対象が見つからない場合でも成功結果が返ること
+     * 更新対象が見つからない場合に失敗結果が返ること
      */
-    public function testHandleReturnsSuccessWhenTaskNotFound(): void
+    public function testHandleReturnsFailureWhenTaskNotFound(): void
     {
         $update_data = ['title' => '更新後'];
 
@@ -55,11 +55,10 @@ class UpdateTaskUseCaseTest extends TestCase
         $use_case = new UpdateTaskUseCase($task_service);
         $result = $use_case->handle(new UpdateTaskInput('task-uuid', 1, $update_data));
 
-        $this->assertTrue($result->isSuccess());
-        /** @var UpdateTaskOutput $output */
-        $output = $result->getOutput();
-        $this->assertInstanceOf(UpdateTaskOutput::class, $output);
-        $this->assertNull($output->getTask());
+        $this->assertFalse($result->isSuccess());
+        $this->assertSame('NOT_FOUND', $result->getErrorCode());
+        $this->assertSame('予定が見つかりませんでした', $result->getErrorMessage());
+        $this->assertNull($result->getOutput());
     }
 
     /**

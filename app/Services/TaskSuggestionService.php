@@ -27,7 +27,7 @@ class TaskSuggestionService
             '',
             $user_id,
             $data['title'],
-            $data['memo'],
+            $data['memo'] ?? null,
             null,
             null
         );

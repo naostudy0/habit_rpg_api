@@ -81,6 +81,7 @@ class EloquentUserRepository implements UserRepositoryInterface
         }
 
         $model->update($update_data);
+        $model->refresh();
 
         return $this->toDomain($model);
     }

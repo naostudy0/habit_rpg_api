@@ -18,7 +18,7 @@ class User
     private bool $is_24_hour_format;
 
     /**
-     * @param string|null $password_hash ハッシュ済みパスワード（更新時は生パスワード）
+     * @param string|null $password_hash ハッシュ済みパスワード（null の場合はパスワード更新なし。生パスワードが渡された場合は Eloquent Model のミューテタでハッシュ化される）
      */
     public function __construct(
         ?int $user_id,

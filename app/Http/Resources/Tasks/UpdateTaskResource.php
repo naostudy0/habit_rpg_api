@@ -15,9 +15,11 @@ class UpdateTaskResource
     public static function fromResult(Result $result): JsonResponse
     {
         if (!$result->isSuccess()) {
+            $status = $result->getErrorCode() === 'NOT_FOUND' ? 404 : 400;
+
             return ApiResponseResource::error(
                 $result->getErrorMessage() ?? '予定の更新に失敗しました',
-                400
+                $status
             );
         }
 
@@ -28,7 +30,7 @@ class UpdateTaskResource
 
         $task = $output->getTask();
         if ($task === null) {
-            return ApiResponseResource::error('予定の更新に失敗しました', 400);
+            return ApiResponseResource::error('予定が見つかりません', 404);
         }
 
         return ApiResponseResource::success(

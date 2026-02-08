@@ -23,7 +23,7 @@ class DeleteTaskSuggestionResource
 
         $output = $result->getOutput();
         if (!$output instanceof DeleteTaskSuggestionOutput) {
-            return ApiResponseResource::error('提案が見つかりません', 404);
+            return ApiResponseResource::error('内部サーバーエラー: 出力型不一致', 500);
         }
 
         return ApiResponseResource::success(

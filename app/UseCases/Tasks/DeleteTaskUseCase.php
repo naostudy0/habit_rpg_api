@@ -25,7 +25,11 @@ class DeleteTaskUseCase implements UseCaseInterface
             return Result::failure('INVALID_INPUT', '予定の削除に失敗しました');
         }
 
-        $this->task_service->deleteTask($input->getUuid(), $input->getUserId());
+        $deleted = $this->task_service->deleteTask($input->getUuid(), $input->getUserId());
+
+        if (!$deleted) {
+            return Result::failure('NOT_FOUND', '予定が見つかりません');
+        }
 
         return Result::success(new DeleteTaskOutput('予定を削除しました'));
     }
