@@ -95,7 +95,7 @@ Docker 環境の詳細については、以下を参照してください。
 
 ### レイヤ構成
 
-```
+```text
 Controller → UseCase → Service → Repository Interface → 永続化
 ```
 
@@ -222,7 +222,7 @@ erDiagram
 
 ## プロジェクト構造
 
-```
+```text
 app/
 ├── Console/          # Artisan コマンド（AI 提案バッチなど）
 ├── Domain/           # ドメイン層
