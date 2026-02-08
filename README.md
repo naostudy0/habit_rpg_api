@@ -125,14 +125,12 @@ flowchart LR
     subgraph Infra["インフラ"]
         F[Eloquent Repository]
     end
-    subgraph DB[(MySQL)]
-    end
     A --> B
     B --> C
     C --> D
     D --> E
     E --> F
-    F --> DB
+    F --> G[(MySQL)]
 ```
 
 #### AI 提案生成（バッチ: tasks:suggest）
