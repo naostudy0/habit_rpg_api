@@ -258,11 +258,19 @@ class RegistrationService
     {
         $message = $exception->getMessage();
         $error_info = $exception->errorInfo;
+        $sqlstate = isset($error_info[0]) ? (string) $error_info[0] : '';
+        $driver_code = isset($error_info[1]) ? (int) $error_info[1] : 0;
+        $has_email_constraint_hint = str_contains($message, 'users_email_unique');
 
-        return str_contains($message, 'users_email_unique')
-            || str_contains($message, 'Duplicate entry')
-            || ((string) $exception->getCode() === '23000')
-            || ((isset($error_info[1]) ? (int) $error_info[1] : 0) === 1062);
+        if ($sqlstate === '23505') {
+            return true;
+        }
+
+        if ($sqlstate === '23000' && ($driver_code === 1062 || $has_email_constraint_hint)) {
+            return true;
+        }
+
+        return $has_email_constraint_hint || str_contains($message, 'Duplicate entry');
     }
 
     private function generateOtpCode(): string
