@@ -29,6 +29,15 @@ class RegistrationOtp extends Model
     ];
 
     /**
+     * @var array<string>
+     */
+    protected $hidden = [
+        'email',
+        'otp_hash',
+        'registration_token_hash',
+    ];
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array

@@ -6,7 +6,10 @@ use App\Mail\RegistrationOtpMail;
 use App\Models\RegistrationOtp;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
@@ -21,6 +24,7 @@ class RegistrationService
     public const ERROR_OTP_ATTEMPTS_EXCEEDED = 'OTP_ATTEMPTS_EXCEEDED';
     public const ERROR_REGISTRATION_TOKEN_INVALID = 'REGISTRATION_TOKEN_INVALID';
     public const ERROR_REGISTRATION_TOKEN_EXPIRED = 'REGISTRATION_TOKEN_EXPIRED';
+    public const ERROR_REGISTRATION_FAILED = 'REGISTRATION_FAILED';
 
     /**
      * OTPを発行してメール送信
@@ -173,16 +177,40 @@ class RegistrationService
             return $this->failure(self::ERROR_EMAIL_ALREADY_REGISTERED, 'このメールアドレスはすでに登録されています。');
         }
 
-        $user = User::create([
-            'name' => $name,
-            'email' => $record->email,
-            'password' => $password,
-            'email_verified_at' => $now,
-            'is_dark_mode' => false,
-            'is_24_hour_format' => true,
-        ]);
+        try {
+            $user = DB::transaction(function () use ($record, $name, $password, $now) {
+                $user = User::create([
+                    'name' => $name,
+                    'email' => $record->email,
+                    'password' => $password,
+                    'email_verified_at' => $now,
+                    'is_dark_mode' => false,
+                    'is_24_hour_format' => true,
+                ]);
 
-        $record->delete();
+                $record->delete();
+
+                return $user;
+            });
+        } catch (QueryException $e) {
+            if ($this->isDuplicateEmailException($e)) {
+                return $this->failure(self::ERROR_EMAIL_ALREADY_REGISTERED, 'このメールアドレスはすでに登録されています。');
+            }
+
+            Log::error('会員登録に失敗しました。', [
+                'email' => $record->email,
+                'exception' => $e,
+            ]);
+
+            return $this->failure(self::ERROR_REGISTRATION_FAILED, '会員登録に失敗しました。');
+        } catch (\Throwable $e) {
+            Log::error('会員登録に失敗しました。', [
+                'email' => $record->email,
+                'exception' => $e,
+            ]);
+
+            return $this->failure(self::ERROR_REGISTRATION_FAILED, '会員登録に失敗しました。');
+        }
 
         return [
             'success' => true,
@@ -224,6 +252,17 @@ class RegistrationService
     private function registrationTokenExpiresMinutes(): int
     {
         return max(1, (int) config('registration.token.expires_minutes', 15));
+    }
+
+    private function isDuplicateEmailException(QueryException $exception): bool
+    {
+        $message = $exception->getMessage();
+        $error_info = $exception->errorInfo;
+
+        return str_contains($message, 'users_email_unique')
+            || str_contains($message, 'Duplicate entry')
+            || ((string) $exception->getCode() === '23000')
+            || ((isset($error_info[1]) ? (int) $error_info[1] : 0) === 1062);
     }
 
     private function generateOtpCode(): string

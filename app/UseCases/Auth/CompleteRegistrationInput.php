@@ -3,6 +3,7 @@
 namespace App\UseCases\Auth;
 
 use App\UseCases\Inputs\Input;
+use InvalidArgumentException;
 
 class CompleteRegistrationInput implements Input
 {
@@ -12,8 +13,22 @@ class CompleteRegistrationInput implements Input
 
     public function __construct(string $registration_token, string $name, string $password)
     {
-        $this->registration_token = $registration_token;
-        $this->name = $name;
+        $normalized_registration_token = trim($registration_token);
+        if ($normalized_registration_token === '') {
+            throw new InvalidArgumentException('本登録トークンは必須です。');
+        }
+
+        $normalized_name = trim($name);
+        if ($normalized_name === '') {
+            throw new InvalidArgumentException('名前は必須です。');
+        }
+
+        if ($password === '' || mb_strlen($password) < 8) {
+            throw new InvalidArgumentException('パスワードは8文字以上で入力してください。');
+        }
+
+        $this->registration_token = $normalized_registration_token;
+        $this->name = $normalized_name;
         $this->password = $password;
     }
 

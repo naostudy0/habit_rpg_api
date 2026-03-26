@@ -35,7 +35,7 @@ class VerifyRegistrationOtpResource
 
         return ApiResponseResource::success([
             'registration_token' => $output->getRegistrationToken(),
-            'registration_token_expires_at' => $output->getRegistrationTokenExpiresAt(),
+            'registration_token_expires_at' => $output->getRegistrationTokenExpiresAt()->format(DATE_ATOM),
         ], 'ワンタイムパスワードを検証しました。', 200);
     }
 }

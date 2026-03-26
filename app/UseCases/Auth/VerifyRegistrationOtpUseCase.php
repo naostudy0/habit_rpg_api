@@ -29,7 +29,7 @@ class VerifyRegistrationOtpUseCase implements UseCaseInterface
 
         return Result::success(new VerifyRegistrationOtpOutput(
             $result['registration_token'],
-            $result['registration_token_expires_at']->toIso8601String()
+            $result['registration_token_expires_at']
         ));
     }
 }

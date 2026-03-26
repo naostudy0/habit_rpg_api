@@ -28,7 +28,6 @@ return new class extends Migration
             $table->timestamp('registration_token_expires_at')->nullable()->comment('本登録トークン有効期限');
             $table->timestamps();
 
-            $table->index('registration_otp_uuid');
             $table->index('expires_at');
         });
 

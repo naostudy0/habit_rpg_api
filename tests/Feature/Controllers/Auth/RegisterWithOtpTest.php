@@ -178,14 +178,17 @@ class RegisterWithOtpTest extends TestCase
         $this->postJson(route('auth.register.otp.send'), ['email' => $email])
             ->assertStatus(200);
 
+        $otp_code = $this->fetchLastOtpCodeFromMail();
+        $wrong_code = $otp_code === '000000' ? '999999' : '000000';
+
         $this->postJson(route('auth.register.otp.verify'), [
             'email' => $email,
-            'otp' => '000000',
+            'otp' => $wrong_code,
         ])->assertStatus(422);
 
         $response = $this->postJson(route('auth.register.otp.verify'), [
             'email' => $email,
-            'otp' => '000000',
+            'otp' => $wrong_code,
         ]);
 
         $response->assertStatus(429);

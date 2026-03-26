@@ -18,7 +18,7 @@ Route::group([
         ->middleware('throttle:5,1')
         ->name('register.otp.send');
     Route::post('/register/otp/verify', [AuthController::class, 'verifyRegistrationOtp'])
-        ->middleware('throttle:10,1')
+        ->middleware('throttle:5,1')
         ->name('register.otp.verify');
     Route::post('/register/complete', [AuthController::class, 'completeRegistration'])
         ->middleware('throttle:10,1')
