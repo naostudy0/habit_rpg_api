@@ -9,10 +9,20 @@ use Illuminate\Support\Facades\Route;
 // 認証関連のルート
 Route::group([
     'prefix' => 'auth',
-    'middleware' => 'throttle:5,1',
     'as' => 'auth.',
 ], function () {
-    Route::post('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])
+        ->middleware('throttle:5,1')
+        ->name('login');
+    Route::post('/register/otp/send', [AuthController::class, 'sendRegistrationOtp'])
+        ->middleware('throttle:5,1')
+        ->name('register.otp.send');
+    Route::post('/register/otp/verify', [AuthController::class, 'verifyRegistrationOtp'])
+        ->middleware('throttle:10,1')
+        ->name('register.otp.verify');
+    Route::post('/register/complete', [AuthController::class, 'completeRegistration'])
+        ->middleware('throttle:10,1')
+        ->name('register.complete');
 });
 
 // ユーザー関連のルート
