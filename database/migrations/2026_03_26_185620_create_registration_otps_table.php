@@ -31,7 +31,9 @@ return new class extends Migration
             $table->index('expires_at');
         });
 
-        DB::statement("ALTER TABLE `registration_otps` COMMENT = '新規登録OTP管理テーブル'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE `registration_otps` COMMENT = '新規登録OTP管理テーブル'");
+        }
     }
 
     /**
