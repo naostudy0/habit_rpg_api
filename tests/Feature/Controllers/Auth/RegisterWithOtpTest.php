@@ -49,6 +49,10 @@ class RegisterWithOtpTest extends TestCase
             'email' => $email,
             'name' => 'New User',
         ]);
+        $this->assertNotNull(
+            User::where('email', $email)->value('email_verified_at'),
+            '本登録完了時に email_verified_at が設定されること'
+        );
 
         $login_response = $this->postJson(route('auth.login'), [
             'email' => $email,
