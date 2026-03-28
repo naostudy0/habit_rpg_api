@@ -28,6 +28,7 @@ class User extends Authenticatable
         'user_uuid',
         'name',
         'email',
+        'email_verified_at',
         'password',
         'is_dark_mode',
         'is_24_hour_format',
