@@ -24,3 +24,11 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Serena local/runtime artifacts (do not version)
+.serena/cache/
+.serena/logs/
+.serena/sessions/
+.serena/tmp/
+.serena/project.local.yml
+.serena/memories/
