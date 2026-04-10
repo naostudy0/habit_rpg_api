@@ -1,2 +1,6 @@
 /cache
+/logs/
+/sessions/
+/tmp/
+/memories/
 /project.local.yml

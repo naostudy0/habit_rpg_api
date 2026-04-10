@@ -25,4 +25,4 @@ When finishing code changes in this project:
 
 6. Before PR/merge, mirror CI expectations:
 - `./vendor/bin/pint --test`
-- phpunit execution with passing result
+- `php artisan test` must pass before PR/merge
