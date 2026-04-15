@@ -92,6 +92,14 @@ Docker 環境の詳細については、以下を参照してください。
 * レイヤードアーキテクチャ + ユースケース駆動
 * フレームワーク非依存な Domain を中心に据えた設計
 
+## AI運用ドキュメント
+
+AI 活用時の共通ルールと責任分界は、以下のドキュメントを参照してください。
+
+* [AGENTS.md](AGENTS.md)
+* [docs/ai-usage-policy.md](docs/ai-usage-policy.md)
+* [docs/serena/management-policy.md](docs/serena/management-policy.md)
+
 ## アーキテクチャ概要
 
 ### レイヤ構成
